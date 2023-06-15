@@ -1,6 +1,8 @@
+# Standard Library
 import tomllib
-from typing import Any, Literal
+from typing import Literal
 
+# Third Party
 from icecream import ic
 from pydantic import BaseModel, BaseSettings
 
@@ -21,14 +23,21 @@ class ApiConf(BaseModel):
 
     @property
     def auth_url(self) -> str:
-        if self.auth.url[0] == ':':
+        if self.auth.url[0] == ":":
             return getattr(self, self.auth.url[1:])
-        
+
         return self.auth.url
-    
-    #def get_url(self, name):
+
+    @property
+    def settings(self) -> Settings:
+        return Settings()
+
     def __getitem__(self, key: str) -> str:
         return f"{Settings().base_url.strip('/')}/{str(self.urls[key]).strip('/')}"
+
+    @property
+    def service_name(self) -> str:
+        return f"apt-test:{self.settings.base_url}"
 
 
 with open("api-conf.toml") as f:

@@ -4,14 +4,28 @@ Screen {
 }
 
 #dialog {
+    padding: 0 1;
+    width: 60;
+    height: 22;
+    border: thick $background 80%;
+    background: $surface;
+    grid-size: 1;
+    grid-gutter: 1 2;
+    grid-rows: 1fr 3;
+
+}
+
+#dialog-inputs {
     grid-size: 2;
     grid-gutter: 1 2;
     grid-rows: 1fr 3;
-    padding: 0 1;
-    width: 60;
-    height: 20;
-    border: thick $background 80%;
-    background: $surface;
+    grid-columns: 1fr 2fr;
+}
+
+#dialog-buttons {
+    grid-size: 2;
+    grid-gutter: 1 2;
+    grid-rows: 1fr 3;
 }
 
 #question {
