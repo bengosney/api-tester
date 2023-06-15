@@ -1,0 +1,20 @@
+[project]
+name = "api-test"
+description = "Small, Simple api tester"
+version = "0.0.1"
+authors = [{ name = "Ben Gosney", email = "bengosney@googlemail.com" }]
+dependencies = ["textual", "pydantic", "keyring"]
+
+[project.optional-dependencies]
+dev = ["black", "mypy", "pip-tools", "pre-commit", "textual[dev]", "icecream"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 128
+target-version = ['py311']
+
+[tool.pycln]
+all = true

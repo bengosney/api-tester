@@ -1,0 +1,12 @@
+[auth]
+url=":auth"
+type="bearer"
+headers=["username", "$password"]
+
+[urls]
+auth="/admin/index.php?route=api/auth"
+ping="/admin/index.php?route=api/ping"
+
+[urls.order]
+details="/admin/index.php?route=api/order/details&order_id={{ order_id }}"
+list="/admin/index.php?route=api/order/list"
