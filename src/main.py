@@ -1,6 +1,6 @@
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
-from textual.widgets import Footer, Header, Static, Tree
+from textual.widgets import Footer, Header, Static, Tree, Label, Button
 
 from config import api_config
 
@@ -27,7 +27,8 @@ class APITester(App):
         yield Header()
         with Horizontal():
             with Container(id="left-pane"):
-                yield Static("URL List")
+                yield Button("Auth", id="auth")
+                yield Label("URL List")
                 with VerticalScroll():
                     yield tree
             with Container():
@@ -40,7 +41,10 @@ class APITester(App):
         """An action to toggle dark mode."""
         self.dark = not self.dark
 
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        self.exit(str(event.button))
+
 
 if __name__ == "__main__":
     app = APITester()
-    app.run()
+    print(app.run())
