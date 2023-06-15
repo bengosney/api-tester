@@ -1,9 +1,38 @@
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, VerticalScroll
-from textual.widgets import Footer, Header, Static, Tree, Label, Button
+from textual.containers import Container, Horizontal, VerticalScroll, Grid
+from textual.widgets import Footer, Header, Static, Tree, Label, Button, Input
+from textual.screen import Screen
+
+import aiohttp
+import keyring
+
 
 from config import api_config
 
+class LoginScreen(Screen):
+    BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
+
+    def compose(self) -> ComposeResult:
+        yield Grid(
+            Label('Get Auth Token', id="question"),
+            Label('Username'),
+            Input(id="username"),
+            Label('Password'),
+            Input(id="password", password=True),
+            Button('Auth', variant="primary", id="do_auth"),
+            Button('Cancel', id="cancel"),
+            id="dialog"
+        )
+
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "cancel":
+            self.app.pop_screen()
+        else:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(api_config['auth']) as response:
+                    html = await response.text()
+                    self.app.exit(html)
+            
 
 class APITester(App):
     """Small, Simple API Tester."""
@@ -27,7 +56,8 @@ class APITester(App):
         yield Header()
         with Horizontal():
             with Container(id="left-pane"):
-                yield Button("Auth", id="auth")
+                if api_config.auth_url:
+                    yield Button("Auth", id="auth")
                 yield Label("URL List")
                 with VerticalScroll():
                     yield tree
@@ -42,7 +72,8 @@ class APITester(App):
         self.dark = not self.dark
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        self.exit(str(event.button))
+        if event.button.id == 'auth':
+            self.push_screen(LoginScreen())
 
 
 if __name__ == "__main__":
