@@ -57,11 +57,14 @@ class Endpoint(Static):
         except KeyError:
             pass
 
-        async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.get(self.url) as response:
-                json = await response.json()
-                if type(output := self.query_one("#get-response")) == Pretty:
-                    output.update(json)
+        if type(output := self.query_one("#get-response")) == Pretty:
+            async with aiohttp.ClientSession(headers=headers) as session:
+                try:
+                    async with session.get(self.url) as response:
+                        json = await response.json()
+                        output.update(json)
+                except Exception as e:
+                    output.update(e.__dict__)
 
 
 class LoginScreen(Screen):
