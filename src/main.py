@@ -3,7 +3,6 @@ from datetime import datetime
 
 # Third Party
 import aiohttp
-from rich.console import RenderableType
 from textual.app import App, ComposeResult
 from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
@@ -12,38 +11,30 @@ from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Pret
 # First Party
 from auth import auth
 from config import api_config
-from utils import extract, join_url
+from url import URL
+from utils import extract
 
 
 class Endpoint(Static):
-    def __init__(
-        self,
-        url: str,
-        renderable: RenderableType = "",
-        *,
-        expand: bool = False,
-        shrink: bool = False,
-        markup: bool = True,
-        name: str | None = None,
-        id: str | None = None,
-        classes: str | None = None,
-        disabled: bool = False,
-    ) -> None:
-        super().__init__(
-            renderable, expand=expand, shrink=shrink, markup=markup, name=name, id=id, classes=classes, disabled=disabled
-        )
-        self._url = url
-
-    @property
-    def url(self) -> str:
-        return join_url(api_config.settings.base_url, self._url)
+    def __init__(self, url: URL | str, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.url = url
 
     def compose(self) -> ComposeResult:
         yield Label("endpoint")
         yield Label(f"URL: {self.url}")
-        yield Button("GET", id="get-url")
-        with VerticalScroll():
-            yield Pretty(None, id="get-response")
+
+        if type(self.url) == URL:
+            with VerticalScroll(id="vars-grid"):
+                with Grid(classes="twoXtwo"):
+                    for field in self.url.variables():
+                        yield Label(field)
+                        yield Input(id=f"{field}-input")
+
+        with Vertical(id="output"):
+            yield Button("GET", id="get-url")
+            with VerticalScroll():
+                yield Pretty(None, id="get-response")
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
@@ -60,7 +51,7 @@ class Endpoint(Static):
         if type(output := self.query_one("#get-response")) == Pretty:
             async with aiohttp.ClientSession(headers=headers) as session:
                 try:
-                    async with session.get(self.url) as response:
+                    async with session.get(str(self.url)) as response:
                         json = await response.json()
                         output.update(json)
                 except Exception as e:
@@ -183,7 +174,7 @@ class APITester(App):
             self.debug_log(f'selected {event.node.data["url"]}', event.node.__dict__)
             qc = self.query_one("#query-container")
             qc.remove_children()
-            qc.mount(Endpoint(event.node.data["url"]))
+            qc.mount(Endpoint(URL(event.node.data["url"])))
         else:
             self.debug_log("node has no url?")
 

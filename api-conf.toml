@@ -9,5 +9,5 @@ auth="/admin/index.php?route=api/auth"
 ping="/admin/index.php?route=api/ping"
 
 [urls.order]
-details="/admin/index.php?route=api/order/details&order_id={{ order_id }}"
+details="/admin/index.php?route=api/order/details&order_id={{ order_id }}&other={{ other }}"
 list="/admin/index.php?route=api/order/list"

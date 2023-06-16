@@ -3,6 +3,23 @@ Screen {
     layers: below above;
 }
 
+.twoXtwo {
+    grid-size: 2;
+    grid-gutter: 1 2;
+    grid-rows: 1fr 3;
+}
+
+#vars-grid {
+
+    padding: 1;
+}
+#vars-grid Grid {
+    grid-columns: 1fr 2fr;
+}
+#output {
+
+}
+
 #dialog {
     padding: 0 1;
     width: 60;
