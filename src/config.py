@@ -15,6 +15,7 @@ class AuthConf(BaseModel):
     url: str
     type: Literal["bearer"]
     headers: list[str]
+    token_path: str
 
 
 class ApiConf(BaseModel):

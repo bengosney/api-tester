@@ -6,6 +6,9 @@ from config import api_config
 
 
 class Auth:
+    def __init__(self) -> None:
+        self._store: dict[str, str] = {}
+
     def _credentials(self):
         return keyring.get_credential(api_config.service_name, None)
 
@@ -27,6 +30,12 @@ class Auth:
     def remove(self) -> None:
         if self.username:
             keyring.delete_password(api_config.service_name, self.username)
+
+    def __setitem__(self, key: str, data: str) -> None:
+        self._store[key] = data
+
+    def __getitem__(self, key: str) -> str:
+        return self._store[key]
 
 
 auth = Auth()

@@ -7,11 +7,11 @@ Screen {
     padding: 0 1;
     width: 60;
     height: 22;
-    border: thick $background 80%;
-    background: $surface;
     grid-size: 1;
     grid-gutter: 1 2;
     grid-rows: 1fr 3;
+    background: $surface;
+    border: thick $background 80%;
 
 }
 
@@ -46,4 +46,17 @@ Button {
 #login-box {
     layer: above;
     background: darkcyan;
+}
+
+#main-pane {
+    height: 2fr;
+}
+
+#debug-log-wrapper {
+    height: 1fr;
+    border-top: thick $background 80%;
+    background: $background;
+    grid-size: 2;
+    grid-gutter: 1 2;
+    grid-columns: 10fr 1fr;
 }
