@@ -1,3 +1,4 @@
+# Standard Library
 from typing import Any
 
 
@@ -9,5 +10,6 @@ def extract(store: dict[str, Any], selector: str) -> Any:
 
     return cur
 
+
 def join_url(*args) -> str:
-    return "/".join([str(p).strip('/') for p in args])
+    return "/".join([str(p).strip("/") for p in args])

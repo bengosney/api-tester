@@ -1,28 +1,37 @@
+# Standard Library
+from datetime import datetime
+
 # Third Party
 import aiohttp
 from rich.console import RenderableType
 from textual.app import App, ComposeResult
-from textual.containers import Container, Grid, Horizontal, VerticalScroll, Vertical
+from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
-from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Static, Tree, TextLog, Pretty
-from textual.reactive import reactive
-
-from datetime import datetime
-
+from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Pretty, Static, TextLog, Tree
 
 # First Party
 from auth import auth
 from config import api_config
-
 from utils import extract, join_url
-
-from icecream import ic
-from time import monotonic
 
 
 class Endpoint(Static):
-    def __init__(self, url:str, renderable: RenderableType = "", *, expand: bool = False, shrink: bool = False, markup: bool = True, name: str | None = None, id: str | None = None, classes: str | None = None, disabled: bool = False) -> None:
-        super().__init__(renderable, expand=expand, shrink=shrink, markup=markup, name=name, id=id, classes=classes, disabled=disabled)
+    def __init__(
+        self,
+        url: str,
+        renderable: RenderableType = "",
+        *,
+        expand: bool = False,
+        shrink: bool = False,
+        markup: bool = True,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        super().__init__(
+            renderable, expand=expand, shrink=shrink, markup=markup, name=name, id=id, classes=classes, disabled=disabled
+        )
         self._url = url
 
     @property
@@ -38,17 +47,15 @@ class Endpoint(Static):
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
-            case "get-url": await self.get_url()
+            case "get-url":
+                await self.get_url()
 
     async def get_url(self):
-        headers = {
-            'accept': 'application/json',
-            'Authorization': f"Bearer {auth['token']}"
-        }
+        headers = {"accept": "application/json", "Authorization": f"Bearer {auth['token']}"}
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(self.url) as response:
                 json = await response.json()
-                if type(output := self.query_one('#get-response')) == Pretty:
+                if type(output := self.query_one("#get-response")) == Pretty:
                     output.update(json)
 
 
@@ -87,7 +94,7 @@ class LoginScreen(Screen):
                 }
                 async with session.post(api_config["auth"], data={**post_data}) as response:
                     json = await response.json()
-                    auth['token'] = extract(json, api_config.auth.token_path)
+                    auth["token"] = extract(json, api_config.auth.token_path)
 
         self.app.pop_screen()
 
@@ -103,11 +110,11 @@ class APITester(App):
         tree: Tree[dict] = Tree("URLs")
         for key, val in api_config.urls.items():
             if isinstance(val, str):
-                tree.root.add_leaf(f"{key} - {val}", data={'url': val})
+                tree.root.add_leaf(f"{key} - {val}", data={"url": val})
             else:
                 child = tree.root.add(key)
                 for sub_key, sub_val in val.items():
-                    child.add_leaf(f"{sub_key} - {sub_val}", data={'url': sub_val})
+                    child.add_leaf(f"{sub_key} - {sub_val}", data={"url": sub_val})
 
         tree.root.expand_all()
 
@@ -136,16 +143,18 @@ class APITester(App):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
-            case "auth": self.push_screen(LoginScreen())
-            case "clear-debug": self.debug_log_clear()
+            case "auth":
+                self.push_screen(LoginScreen())
+            case "clear-debug":
+                self.debug_log_clear()
 
     def debug_log_clear(self) -> None:
-        textlog = self.query_one('#debug-log')
+        textlog = self.query_one("#debug-log")
         if type(textlog) == TextLog:
             textlog.clear()
 
-    def debug_log(self, msg: str, context = None) -> None:
-        textlog = self.query_one('#debug-log')
+    def debug_log(self, msg: str, context=None) -> None:
+        textlog = self.query_one("#debug-log")
         if type(textlog) == TextLog:
             now = datetime.now()
             textlog.write(f'{now.strftime("%H:%M.%S")}: {msg}')
@@ -155,11 +164,11 @@ class APITester(App):
     def on_tree_node_selected(self, event: Tree.NodeSelected) -> None:
         if event.node.data:
             self.debug_log(f'selected {event.node.data["url"]}', event.node.__dict__)
-            qc = self.query_one('#query-container')
+            qc = self.query_one("#query-container")
             qc.remove_children()
             qc.mount(Endpoint(event.node.data["url"]))
         else:
-            self.debug_log('node has no url?')
+            self.debug_log("node has no url?")
 
 
 if __name__ == "__main__":
