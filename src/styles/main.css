@@ -53,6 +53,7 @@ Button {
 }
 
 #debug-log-wrapper {
+    display: none;
     height: 1fr;
     border-top: thick $background 80%;
     background: $background;

@@ -51,7 +51,12 @@ class Endpoint(Static):
                 await self.get_url()
 
     async def get_url(self):
-        headers = {"accept": "application/json", "Authorization": f"Bearer {auth['token']}"}
+        headers = {"accept": "application/json"}
+        try:
+            headers["Authorization"] = f"Bearer {auth['token']}"
+        except KeyError:
+            pass
+
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(self.url) as response:
                 json = await response.json()
@@ -104,7 +109,12 @@ class APITester(App):
 
     CSS_PATH = "styles/main.css"
 
-    BINDINGS = [("d", "toggle_dark", "Toggle dark mode")]
+    BINDINGS = [
+        ("d", "toggle_dark", "Toggle dark mode"),
+        ("l", "toggle_debug", "Toggle debug log"),
+    ]
+
+    show_debug = False
 
     def compose(self) -> ComposeResult:
         tree: Tree[dict] = Tree("URLs")
@@ -140,6 +150,10 @@ class APITester(App):
 
     def action_toggle_dark(self) -> None:
         self.dark = not self.dark
+
+    def action_toggle_debug(self) -> None:
+        self.show_debug = not self.show_debug
+        self.query_one("#debug-log-wrapper").styles.display = "block" if self.show_debug else "none"
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
