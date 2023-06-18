@@ -1,4 +1,5 @@
 # Standard Library
+from functools import lru_cache
 from urllib.parse import urljoin
 
 # Third Party
@@ -26,9 +27,14 @@ class URL:
     def __getitem__(self, name: str) -> str:
         return self._data[name]
 
+    @lru_cache
     def variables(self) -> set[str]:
         ast = env.parse(self.url)
         return meta.find_undeclared_variables(ast)
+
+    @property
+    def variable_count(self) -> int:
+        return len(self.variables())
 
 
 if __name__ == "__main__":

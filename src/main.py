@@ -3,8 +3,10 @@ from datetime import datetime
 
 # Third Party
 import aiohttp
+from textual import on
 from textual.app import App, ComposeResult
 from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
+from textual.reactive import Reactive
 from textual.screen import Screen
 from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Pretty, Static, TextLog, Tree
 
@@ -16,18 +18,20 @@ from utils import extract
 
 
 class Endpoint(Static):
+    url = Reactive("")
+
     def __init__(self, url: URL | str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.url = url
 
     def compose(self) -> ComposeResult:
-        yield Label("endpoint")
-        yield Label(f"URL: {self.url}")
+        self.styles.padding = 1
+        yield Label(str(self.url), id="url-label")
 
-        if type(self.url) == URL:
+        if type(self.url) == URL and self.url.variable_count > 0:
             with VerticalScroll(id="vars-grid"):
-                with Grid(classes="twoXtwo"):
-                    for field in self.url.variables():
+                for field in self.url.variables():
+                    with Horizontal():
                         yield Label(field)
                         yield Input(id=f"{field}-input")
 
@@ -40,6 +44,16 @@ class Endpoint(Static):
         match event.button.id:
             case "get-url":
                 await self.get_url()
+
+    @on(Input.Changed)
+    def update_vars(self, event: Input.Changed) -> None:
+        if type(self.url) == URL:
+            for field in self.url.variables():
+                if type(input := self.query_one(f"#{field}-input")) == Input:
+                    self.url[field] = input.value
+
+            if type(label := self.query_one("#url-label")) == Label:
+                label.update(str(self.url))
 
     async def get_url(self):
         headers = {"accept": "application/json"}
