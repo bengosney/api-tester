@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from jinja2 import BaseLoader, Environment, meta, select_autoescape
 
 # First Party
-from config import api_config
+from apitester.config import api_config
 
 env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
 

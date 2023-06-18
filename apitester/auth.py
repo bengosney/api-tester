@@ -3,8 +3,8 @@ import keyring
 from keyring.errors import KeyringLocked
 
 # First Party
-from config import api_config
-from utils import suppress
+from apitester.config import api_config
+from apitester.utils import suppress
 
 
 class Auth:

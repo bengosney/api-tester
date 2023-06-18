@@ -11,10 +11,10 @@ from textual.screen import Screen
 from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Pretty, Static, TextLog, Tree
 
 # First Party
-from auth import auth
-from config import api_config
-from url import URL
-from utils import extract
+from apitester.auth import auth
+from apitester.config import api_config
+from apitester.url import URL
+from apitester.utils import extract
 
 
 class Endpoint(Static):

@@ -8,6 +8,12 @@ dependencies = ["textual", "pydantic", "keyring", "Jinja2"]
 [project.optional-dependencies]
 dev = ["black", "mypy", "pip-tools", "pre-commit", "textual[dev]", "icecream"]
 
+[project.scripts]
+apitester = "apitester:app.run"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
