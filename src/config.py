@@ -3,7 +3,6 @@ import tomllib
 from typing import Literal
 
 # Third Party
-from icecream import ic
 from pydantic import BaseModel, BaseSettings
 
 
@@ -46,8 +45,3 @@ with open("api-conf.toml") as f:
     raw_api_conf = tomllib.loads(content)
 
 api_config = ApiConf(**raw_api_conf)
-
-
-if __name__ == "__main__":
-    ic(raw_api_conf)
-    ic(api_config)

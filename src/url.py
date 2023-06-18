@@ -3,7 +3,6 @@ from functools import lru_cache
 from urllib.parse import urljoin
 
 # Third Party
-from icecream import ic
 from jinja2 import BaseLoader, Environment, meta, select_autoescape
 
 # First Party
@@ -35,12 +34,3 @@ class URL:
     @property
     def variable_count(self) -> int:
         return len(self.variables())
-
-
-if __name__ == "__main__":
-    bob = env.from_string("this {{ pop }} that")
-    pop = env.parse("this {{ pip }} that {{ other_var }}")
-    stuff = meta.find_undeclared_variables(pop)
-    ic(pop)
-    ic(pop.__dict__)
-    ic(stuff)
