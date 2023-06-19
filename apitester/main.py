@@ -6,29 +6,27 @@ import aiohttp
 from textual import on
 from textual.app import App, ComposeResult
 from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
-from textual.reactive import Reactive
 from textual.screen import Screen
 from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Pretty, Static, TextLog, Tree
 
 # First Party
 from apitester.auth import auth
-from apitester.config import api_config
+from apitester.config import URLConf, api_config
 from apitester.url import URL
 from apitester.utils import extract
 
 
 class Endpoint(Static):
-    url = Reactive("")
-
-    def __init__(self, url: URL | str, *args, **kwargs) -> None:
+    def __init__(self, url: URL, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.url = url
 
     def compose(self) -> ComposeResult:
         self.styles.padding = 1
-        yield Label(str(self.url), id="url-label")
+        yield Label(f"URL: {self.url}", id="url-label")
+        yield Label(f"Method: {self.url.method}", id="method-label")
 
-        if type(self.url) == URL and self.url.variable_count > 0:
+        if self.url.variable_count > 0:
             with VerticalScroll(id="vars-grid"):
                 for field in self.url.variables():
                     with Horizontal():
@@ -144,7 +142,9 @@ class APITester(App):
                 if isinstance(val, dict):
                     build_tree(val, node.add(key))
                 elif isinstance(val, str):
-                    node.add_leaf(f"{key} - {val}", data={"url": val})
+                    node.add_leaf(f"{key} - {val}", data={"url": URL(val)})
+                elif isinstance(val, URLConf):
+                    node.add_leaf(f"{key} - {val.url}", data={"url": URL(url=val.url, method=val.method)})
 
         build_tree(api_config.urls, tree.root)
 
@@ -202,7 +202,7 @@ class APITester(App):
             self.debug_log(f'selected {event.node.data["url"]}', event.node.__dict__)
             qc = self.query_one("#query-container")
             qc.remove_children()
-            qc.mount(Endpoint(URL(event.node.data["url"])))
+            qc.mount(Endpoint(event.node.data["url"]))
         else:
             self.debug_log("node has no url?")
 

@@ -17,9 +17,17 @@ class AuthConf(BaseModel):
     token_path: str
 
 
+class URLConf(BaseModel):
+    url: str
+    method: Literal["GET", "POST"]
+
+
+URLConfType = str | URLConf
+
+
 class ApiConf(BaseModel):
     auth: AuthConf
-    urls: dict[str, str | dict[str, str]]
+    urls: dict[str, URLConfType | dict[str, URLConfType]]
 
     @property
     def auth_url(self) -> str:
