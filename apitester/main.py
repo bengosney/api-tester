@@ -138,13 +138,15 @@ class APITester(App):
 
     def compose(self) -> ComposeResult:
         tree: Tree[dict] = Tree("URLs")
-        for key, val in api_config.urls.items():
-            if isinstance(val, str):
-                tree.root.add_leaf(f"{key} - {val}", data={"url": val})
-            else:
-                child = tree.root.add(key)
-                for sub_key, sub_val in val.items():
-                    child.add_leaf(f"{sub_key} - {sub_val}", data={"url": sub_val})
+
+        def build_tree(items: dict, node):
+            for key, val in items.items():
+                if isinstance(val, dict):
+                    build_tree(val, node.add(key))
+                elif isinstance(val, str):
+                    node.add_leaf(f"{key} - {val}", data={"url": val})
+
+        build_tree(api_config.urls, tree.root)
 
         tree.root.expand_all()
 
