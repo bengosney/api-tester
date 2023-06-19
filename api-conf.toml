@@ -11,3 +11,4 @@ ping="/admin/index.php?route=api/ping"
 [urls.order]
 details="/admin/index.php?route=api/order/details&order_id={{ order_id }}&other={{ other }}"
 list="/admin/index.php?route=api/order/list"
+ship={ url = "/admin/index.php?route=api/order/ship", method = "POST" }

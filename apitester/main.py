@@ -65,9 +65,14 @@ class Endpoint(Static):
         if type(output := self.query_one("#get-response")) == Pretty:
             async with aiohttp.ClientSession(headers=headers) as session:
                 try:
-                    async with session.get(str(self.url)) as response:
-                        json = await response.json()
-                        output.update(json)
+                    if "api/order/ship" in str(self.url):
+                        async with session.post(str(self.url)) as response:
+                            json = await response.json()
+                            output.update(json)
+                    else:
+                        async with session.get(str(self.url)) as response:
+                            json = await response.json()
+                            output.update(json)
                 except Exception as e:
                     output.update(e.__dict__)
 

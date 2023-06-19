@@ -1,5 +1,7 @@
 # Standard Library
+from dataclasses import dataclass
 from functools import lru_cache
+from typing import Literal
 from urllib.parse import urljoin
 
 # Third Party
@@ -11,9 +13,15 @@ from apitester.config import api_config
 env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
 
 
+@dataclass()
 class URL:
-    def __init__(self, url: str) -> None:
-        self.url = url
+    url: str
+    method: Literal["GET", "POST"] = "GET"
+
+    def __hash__(self) -> int:
+        return hash((self.url, self.method))
+
+    def __post_init__(self) -> None:
         self._data = {}
 
     def __str__(self) -> str:
