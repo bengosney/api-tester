@@ -67,12 +67,19 @@ class Endpoint(Static):
                 try:
                     if "api/order/ship" in str(self.url):
                         async with session.post(str(self.url)) as response:
-                            json = await response.json()
-                            output.update(json)
+                            if "json" in response.content_type:
+                                data = await response.json()
+                            else:
+                                data = await response.text()
+                                data = data.replace("\\n", "\n").replace("\\t", "\t")
+                            output.update(data)
                     else:
                         async with session.get(str(self.url)) as response:
-                            json = await response.json()
-                            output.update(json)
+                            if "json" in response.content_type:
+                                data = await response.json()
+                            else:
+                                data = await response.text()
+                            output.update(data)
                 except Exception as e:
                     output.update(e.__dict__)
 
