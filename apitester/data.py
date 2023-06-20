@@ -8,7 +8,7 @@ from tinydb import Query, TinyDB
 class DataStore:
     _db = None
 
-    def __init__(self, prefix=None) -> None:
+    def __init__(self, prefix: str | None = None) -> None:
         self._file_name = "store"
         self.prexif = prefix
 
