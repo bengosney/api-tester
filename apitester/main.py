@@ -12,6 +12,7 @@ from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Pret
 # First Party
 from apitester.auth import auth
 from apitester.config import URLConf, api_config
+from apitester.data import DataStore
 from apitester.url import URL
 from apitester.utils import extract
 
@@ -20,6 +21,7 @@ class Endpoint(Static):
     def __init__(self, url: URL, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.url = url
+        self.store = DataStore(f"{url.url}-{url.method}")
 
     def compose(self) -> ComposeResult:
         self.styles.padding = 1
@@ -29,12 +31,13 @@ class Endpoint(Static):
         if self.url.variable_count > 0:
             with VerticalScroll(id="vars-grid"):
                 for field in self.url.variables():
+                    id = f"{field}-input"
                     with Horizontal():
                         yield Label(field)
-                        yield Input(id=f"{field}-input")
+                        yield Input(id=id, value=self.store[id])
 
         with Vertical(id="output"):
-            yield Button("GET", id="get-url")
+            yield Button(self.url.method, id="get-url")
             with VerticalScroll():
                 yield Pretty(None, id="get-response")
 
@@ -47,8 +50,10 @@ class Endpoint(Static):
     def update_vars(self, event: Input.Changed) -> None:
         if type(self.url) == URL:
             for field in self.url.variables():
-                if type(input := self.query_one(f"#{field}-input")) == Input:
+                id = f"{field}-input"
+                if type(input := self.query_one(f"#{id}")) == Input:
                     self.url[field] = input.value
+                    self.store[id] = input.value
 
             if type(label := self.query_one("#url-label")) == Label:
                 label.update(str(self.url))
@@ -63,7 +68,8 @@ class Endpoint(Static):
         if type(output := self.query_one("#get-response")) == Pretty:
             async with aiohttp.ClientSession(headers=headers) as session:
                 try:
-                    if "api/order/ship" in str(self.url):
+                    print(self.url.url, self.url.method)
+                    if self.url.method == "POST":
                         async with session.post(str(self.url)) as response:
                             if "json" in response.content_type:
                                 data = await response.json()

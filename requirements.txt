@@ -248,6 +248,10 @@ textual==0.27.0 \
     --hash=sha256:8bdcb09dc35a706ef939b1276ccfdec10eaaee6147b41cb7587cf33298a8dd33 \
     --hash=sha256:dc45eaf7da330686c56d6f76f59d05fd216ce6aad90fa44ee269881efc622151
     # via api-test (pyproject.toml)
+tinydb==4.8.0 \
+    --hash=sha256:30c06d12383d7c332e404ca6a6103fb2b32cbf25712689648c39d9a6bd34bd3d \
+    --hash=sha256:6dd686a9c5a75dfa9280088fd79a419aefe19cd7f4bd85eba203540ef856d564
+    # via api-test (pyproject.toml)
 typing-extensions==4.6.3 \
     --hash=sha256:88a4153d8505aabbb4e13aacb7c486c2b4a33ca3b3f807914a9b4c844c471c26 \
     --hash=sha256:d91d5919357fe7f681a9f2b5b4cb2a5f1ef0a1e9f59c4d8ff0d3491e05c0ffd5
