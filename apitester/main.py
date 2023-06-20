@@ -1,5 +1,6 @@
 # Standard Library
 from datetime import datetime
+from typing import Self
 
 # Third Party
 import aiohttp
@@ -7,7 +8,7 @@ from textual import on
 from textual.app import App, ComposeResult
 from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
-from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Pretty, Static, TextLog, Tree
+from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Pretty, ProgressBar, Static, TextLog, Tree
 
 # First Party
 from apitester.auth import auth
@@ -15,6 +16,26 @@ from apitester.config import URLConf, api_config
 from apitester.data import DataStore
 from apitester.url import URL
 from apitester.utils import extract
+
+
+class Loader(Static):
+    def compose(self) -> ComposeResult:
+        self.bar = ProgressBar(total=100, show_eta=False, show_percentage=False)
+        yield self.bar
+
+    def on_mount(self) -> None:
+        def tick():
+            self.bar.advance(1)
+            if self.bar.progress == 100:
+                self.bar.progress = 0
+
+        self.set_interval(0.01, tick)
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *_args) -> None:
+        self.remove()
 
 
 class Endpoint(Static):
@@ -27,6 +48,7 @@ class Endpoint(Static):
         self.styles.padding = 1
         yield Label(f"URL: {self.url}", id="url-label")
         yield Label(f"Method: {self.url.method}", id="method-label")
+        yield Static(id="loader")
 
         if self.url.variable_count > 0:
             with VerticalScroll(id="vars-grid"):
@@ -44,7 +66,13 @@ class Endpoint(Static):
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
             case "get-url":
-                await self.get_url()
+                event.button.disabled = True
+
+                with Loader() as loader:
+                    self.query_one("#loader").mount(loader)
+                    await self.get_url()
+
+                event.button.disabled = False
 
     @on(Input.Changed)
     def update_vars(self, event: Input.Changed) -> None:
