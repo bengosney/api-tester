@@ -22,7 +22,7 @@ class URL:
         return hash((self.url, self.method))
 
     def __post_init__(self) -> None:
-        self._data = {}
+        self._data: dict[str, str] = {}
 
     def __str__(self) -> str:
         url = env.from_string(self.url)
