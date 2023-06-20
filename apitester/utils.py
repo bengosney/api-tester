@@ -35,7 +35,7 @@ class suppress_disable:
         return self.disabled_return
 
 
-def suppress(exception):
+def suppress(exception, default=None):
     def decorator_suppress(func):
         @functools.wraps(func)
         def wrapper_suppress(*args, **kwargs):
@@ -43,7 +43,7 @@ def suppress(exception):
                 try:
                     return func(*args, **kwargs)
                 except exception:
-                    return None
+                    return default
 
         return wrapper_suppress
 
