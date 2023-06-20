@@ -47,9 +47,20 @@ class ApiConf(BaseModel):
     def service_name(self) -> str:
         return f"apt-test:{self.settings.base_url}"
 
+    @staticmethod
+    def _load_toml():
+        with open("api-conf.toml") as f:
+            content = f.read()
+            return tomllib.loads(content)
 
-with open("api-conf.toml") as f:
-    content = f.read()
-    raw_api_conf = tomllib.loads(content)
+    @classmethod
+    def load(cls):
+        raw_api_conf = cls._load_toml()
+        return cls(**raw_api_conf)
 
-api_config = ApiConf(**raw_api_conf)
+    def reload(self):
+        raw_api_conf = self._load_toml()
+        self.__dict__.update(raw_api_conf)
+
+
+api_config = ApiConf.load()

@@ -124,6 +124,8 @@ class LoginScreen(Screen):
         self.password_input = Input(id="password", password=True, value=auth.password)
         self.remember = Checkbox(id="remember", value=True)
 
+        api_config.reload()
+
         with Grid(id="dialog"):
             with Grid(id="dialog-inputs"):
                 yield Label("Get Auth Token", id="question")
