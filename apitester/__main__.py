@@ -1,6 +1,5 @@
 # First Party
-from apitester.main import APITester
+from apitester import run
 
 if __name__ == "__main__":
-    app = APITester()
-    print(app.run())
+    run()

@@ -1,4 +1,4 @@
 # First Party
-from apitester.main import APITester
+from apitester.app import APITester, run
 
-app = APITester()
+__all__ = ["APITester", "run"]

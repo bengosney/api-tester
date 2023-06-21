@@ -1,119 +1,19 @@
 # Standard Library
 from datetime import datetime
-from typing import Self
 
 # Third Party
 import aiohttp
-from textual import on
 from textual.app import App, ComposeResult
 from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
-from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Pretty, ProgressBar, Static, TextLog, Tree
+from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, TextLog, Tree
 
 # First Party
 from apitester.auth import auth
 from apitester.config import URLConf, api_config
-from apitester.data import DataStore
 from apitester.url import URL
 from apitester.utils import extract
-
-
-class Loader(Static):
-    def compose(self) -> ComposeResult:
-        self.bar = ProgressBar(total=100, show_eta=False, show_percentage=False)
-        yield self.bar
-
-    def on_mount(self) -> None:
-        def tick():
-            self.bar.advance(1)
-            if self.bar.progress == 100:
-                self.bar.progress = 0
-
-        self.set_interval(0.01, tick)
-
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(self, *_args) -> None:
-        self.remove()
-
-
-class Endpoint(Static):
-    def __init__(self, url: URL, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.url = url
-        self.store = DataStore(f"{url.url}-{url.method}")
-
-    def compose(self) -> ComposeResult:
-        self.styles.padding = 1
-        yield Label(f"URL: {self.url}", id="url-label")
-        yield Label(f"Method: {self.url.method}", id="method-label")
-        yield Static(id="loader")
-
-        if self.url.variable_count > 0:
-            with VerticalScroll(id="vars-grid"):
-                for field in self.url.variables():
-                    id = f"{field}-input"
-                    with Horizontal():
-                        yield Label(field)
-                        yield Input(id=id, value=self.store[id])
-
-        with Vertical(id="output"):
-            yield Button(self.url.method, id="get-url")
-            with VerticalScroll():
-                yield Pretty(None, id="get-response")
-
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
-        match event.button.id:
-            case "get-url":
-                event.button.disabled = True
-
-                with Loader() as loader:
-                    self.query_one("#loader").mount(loader)
-                    await self.get_url()
-
-                event.button.disabled = False
-
-    @on(Input.Changed)
-    def update_vars(self, event: Input.Changed) -> None:
-        if type(self.url) == URL:
-            for field in self.url.variables():
-                id = f"{field}-input"
-                if type(input := self.query_one(f"#{id}")) == Input:
-                    self.url[field] = input.value
-                    self.store[id] = input.value
-
-            if type(label := self.query_one("#url-label")) == Label:
-                label.update(str(self.url))
-
-    async def get_url(self):
-        headers = {"accept": "application/json"}
-        try:
-            headers["Authorization"] = f"Bearer {auth['token']}"
-        except KeyError:
-            pass
-
-        if type(output := self.query_one("#get-response")) == Pretty:
-            async with aiohttp.ClientSession(headers=headers) as session:
-                try:
-                    print(self.url.url, self.url.method)
-                    if self.url.method == "POST":
-                        async with session.post(str(self.url)) as response:
-                            if "json" in response.content_type:
-                                data = await response.json()
-                            else:
-                                data = await response.text()
-                                data = data.replace("\\n", "\n").replace("\\t", "\t")
-                            output.update(data)
-                    else:
-                        async with session.get(str(self.url)) as response:
-                            if "json" in response.content_type:
-                                data = await response.json()
-                            else:
-                                data = await response.text()
-                            output.update(data)
-                except Exception as e:
-                    output.update(e.__dict__)
+from apitester.widgets import Endpoint
 
 
 class LoginScreen(Screen):
@@ -159,7 +59,7 @@ class LoginScreen(Screen):
 class APITester(App):
     """Small, Simple API Tester."""
 
-    CSS_PATH = "styles/main.css"
+    CSS_PATH = "../styles/main.css"
 
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
