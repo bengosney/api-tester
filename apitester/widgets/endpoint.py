@@ -11,7 +11,7 @@ from textual.widgets import Button, Input, Label, Pretty, Static
 from apitester.auth import auth
 from apitester.data import DataStore
 from apitester.url import URL
-from apitester.widgets import Loader
+from apitester.widgets.loader import Loader
 
 
 class Endpoint(Static):
