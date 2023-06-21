@@ -83,3 +83,8 @@ Button {
     grid-gutter: 1 2;
     grid-columns: 10fr 1fr;
 }
+
+
+#url-label {
+    text-style: bold;
+}
