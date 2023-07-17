@@ -55,7 +55,7 @@ $(WHEEL_PATH): $(PIP_PATH)
 	@python -m pip install wheel
 
 $(PIP_SYNC_PATH): $(PIP_PATH) $(WHEEL_PATH)
-	@python -m pip install pip-tools
+	@python -m pip install --upgrade pip-tools
 
 $(PRE_COMMIT_PATH): $(PIP_PATH) $(WHEEL_PATH)
 	@python -m pip install pre-commit
@@ -72,3 +72,8 @@ clean: ## Remove all build files
 install: $(PIP_SYNC_PATH) requirements.txt $(REQS) ## Install development requirements (default)
 	@echo "Installing $(filter-out $<,$^)"
 	@python -m piptools sync requirements.txt $(REQS)
+
+upgrade: $(PIP_PATH) $(WHEEL_PATH) $(PIP_SYNC_PATH)
+	@echo "Upgrading pip packages"
+	@python -m piptools compile -q --upgrade pyproject.toml
+	@python -m pre_commit autoupdate
