@@ -10,11 +10,23 @@ class Settings(BaseSettings):
     base_url: str = "http://localhost/"
 
 
-class AuthConf(BaseModel):
-    url: str
+class BearerAuthConf(BaseModel):
     type: Literal["bearer"]
+    url: str
     headers: list[str]
     token_path: str
+
+
+class HeaderAuthConf(BaseModel):
+    type: Literal["header"]
+    key: str
+
+
+class NoAuthCont(BaseModel):
+    type: Literal["none"]
+
+
+AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthCont
 
 
 class URLConf(BaseModel):
@@ -30,11 +42,13 @@ class ApiConf(BaseModel):
     urls: dict[str, URLConfType | dict[str, URLConfType]]
 
     @property
-    def auth_url(self) -> str:
-        if self.auth.url[0] == ":":
-            return getattr(self, self.auth.url[1:])
+    def auth_url(self) -> str | None:
+        if self.auth.type == "bearer":
+            if self.auth.url[0] == ":":
+                return getattr(self, self.auth.url[1:])
 
-        return self.auth.url
+            return self.auth.url
+        return None
 
     @property
     def settings(self) -> Settings:

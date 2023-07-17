@@ -16,6 +16,35 @@ from apitester.utils import extract
 from apitester.widgets import Endpoint
 
 
+class APIKeyScreen(Screen):
+    BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
+
+    def compose(self) -> ComposeResult:
+        self.api_key_input = Input(id="username", value=auth.get("api_key"))
+        self.remember = Checkbox(id="remember", value=True)
+
+        with Grid(id="dialog"):
+            with Grid(id="dialog-inputs"):
+                yield Label("Add API Key", id="question")
+                yield Label("")
+                yield self.api_key_input
+                yield Label("Remember API Key")
+                yield self.remember
+            with Grid(id="dialog-buttons"):
+                yield Button("Auth", variant="primary", id="do_auth")
+                yield Button("Cancel", id="cancel")
+
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "do_auth":
+            if self.remember.value:
+                auth.store("api_key", self.api_key_input.value)
+            else:
+                auth.remove()
+
+            auth["api_key"] = self.api_key_input.value
+        self.app.pop_screen()
+
+
 class LoginScreen(Screen):
     BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
 
@@ -89,7 +118,7 @@ class APITester(App):
         with Vertical():
             with Horizontal(id="main-pane"):
                 with Container(id="left-pane"):
-                    if api_config.auth_url:
+                    if api_config.auth.type != "none":
                         yield Button("Auth", id="auth")
                     yield Label("URL List")
                     with VerticalScroll():
@@ -114,7 +143,11 @@ class APITester(App):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
             case "auth":
-                self.push_screen(LoginScreen())
+                match getattr(api_config.auth, "type", None):
+                    case "bearer":
+                        self.push_screen(LoginScreen())
+                    case "header":
+                        self.push_screen(APIKeyScreen())
             case "clear-debug":
                 self.debug_log_clear()
 

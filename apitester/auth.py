@@ -37,6 +37,10 @@ class Auth:
         if self.username:
             keyring.delete_password(api_config.service_name, self.username)
 
+    def get(self, key) -> str | None:
+        if credential := keyring.get_credential(api_config.service_name, key):
+            return credential.password
+
     def __setitem__(self, key: str, data: str) -> None:
         self._store[key] = data
 
