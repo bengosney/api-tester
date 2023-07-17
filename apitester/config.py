@@ -23,7 +23,7 @@ class HeaderAuthConf(BaseModel):
 
 
 class NoAuthCont(BaseModel):
-    type: Literal["none"]
+    type: Literal["none"] = "none"
 
 
 AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthCont
@@ -38,7 +38,7 @@ URLConfType = str | URLConf
 
 
 class ApiConf(BaseModel):
-    auth: AuthConf
+    auth: AuthConf = NoAuthCont()
     urls: dict[str, URLConfType | dict[str, URLConfType]]
 
     @property
