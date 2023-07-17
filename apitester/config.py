@@ -1,8 +1,10 @@
 # Standard Library
 import tomllib
 from typing import Literal
+from urllib.parse import urljoin
 
 # Third Party
+from jinja2 import BaseLoader, Environment, select_autoescape
 from pydantic import BaseModel, BaseSettings
 
 
@@ -41,14 +43,14 @@ class ApiConf(BaseModel):
     auth: AuthConf = NoAuthCont()
     urls: dict[str, URLConfType | dict[str, URLConfType]]
 
-    @property
-    def auth_url(self) -> str | None:
-        if self.auth.type == "bearer":
-            if self.auth.url[0] == ":":
-                return getattr(self, self.auth.url[1:])
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-            return self.auth.url
-        return None
+        env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
+
+        if hasattr(self.auth, "url"):
+            url = env.from_string(getattr(self.auth, "url", ""))
+            self.auth.url = urljoin(self.settings.base_url, url.render({"urls": self.urls}))
 
     @property
     def settings(self) -> Settings:

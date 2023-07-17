@@ -10,7 +10,7 @@ from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Text
 
 # First Party
 from apitester.auth import auth
-from apitester.config import URLConf, api_config
+from apitester.config import BearerAuthConf, URLConf, api_config
 from apitester.url import URL
 from apitester.utils import extract
 from apitester.widgets import Endpoint
@@ -48,6 +48,10 @@ class APIKeyScreen(Screen):
 class LoginScreen(Screen):
     BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
 
+    def __init__(self, auth: BearerAuthConf, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.auth = auth
+
     def compose(self) -> ComposeResult:
         self.username_input = Input(id="username", value=auth.username)
         self.password_input = Input(id="password", password=True, value=auth.password)
@@ -78,9 +82,9 @@ class LoginScreen(Screen):
                     "username": self.username_input.value,
                     "password": self.password_input.value,
                 }
-                async with session.post(api_config["auth"], data={**post_data}) as response:
+                async with session.post(self.auth.url, data={**post_data}) as response:
                     json = await response.json()
-                    auth["token"] = extract(json, api_config.auth.token_path)
+                    auth["token"] = extract(json, self.auth.token_path)
 
         self.app.pop_screen()
 
@@ -143,11 +147,10 @@ class APITester(App):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
             case "auth":
-                match getattr(api_config.auth, "type", None):
-                    case "bearer":
-                        self.push_screen(LoginScreen())
-                    case "header":
-                        self.push_screen(APIKeyScreen())
+                if api_config.auth.type == "bearer":
+                    self.push_screen(LoginScreen(api_config.auth))
+                if api_config.auth.type == "header":
+                    self.push_screen(APIKeyScreen())
             case "clear-debug":
                 self.debug_log_clear()
 
