@@ -1,11 +1,13 @@
 # Standard Library
 import tomllib
 from typing import Literal
-from urllib.parse import urljoin
 
 # Third Party
-from jinja2 import BaseLoader, Environment, select_autoescape
 from pydantic import BaseModel, BaseSettings
+
+# First Party
+from apitester.url import URL
+from apitester.utils import deferedRenderURL
 
 
 class Settings(BaseSettings):
@@ -24,34 +26,27 @@ class HeaderAuthConf(BaseModel):
     key: str
 
 
-class NoAuthCont(BaseModel):
+class NoAuthConf(BaseModel):
     type: Literal["none"] = "none"
 
 
-AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthCont
+AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthConf
 
 
-class URLConf(BaseModel):
-    url: str
-    method: Literal["GET", "POST"]
-    fields: list[str] = []
-
-
-URLConfType = str | URLConf
+URLConfType = str | URL
 
 
 class ApiConf(BaseModel):
-    auth: AuthConf = NoAuthCont()
+    auth: AuthConf = NoAuthConf()
     urls: dict[str, URLConfType | dict[str, URLConfType]]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
-
         if hasattr(self.auth, "url"):
-            url = env.from_string(getattr(self.auth, "url", ""))
-            self.auth.url = urljoin(self.settings.base_url, url.render({"urls": self.urls}))
+            self.auth.url = deferedRenderURL(
+                template=getattr(self.auth, "url", ""), args={"urls": self.urls}, base_url=self.settings.base_url
+            )
 
     @property
     def settings(self) -> Settings:

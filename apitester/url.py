@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 from jinja2 import BaseLoader, Environment, meta, select_autoescape
 
 # First Party
-from apitester.config import api_config
+from apitester import config
 
 env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
 
@@ -27,7 +27,7 @@ class URL:
 
     def __str__(self) -> str:
         url = env.from_string(self.url)
-        return urljoin(api_config.settings.base_url, url.render(self._data))
+        return urljoin(config.api_config.settings.base_url, url.render(self._data))
 
     def __repr__(self) -> str:
         return f"<{self.method}> - {self.url} [{[f for f in self.fields]}]"

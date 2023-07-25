@@ -1,7 +1,12 @@
 # Standard Library
 import functools
 from contextlib import suppress as ctx_suppress
+from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urljoin
+
+# Third Party
+from jinja2 import BaseLoader, Environment, select_autoescape
 
 
 def extract(store: dict[str, Any], selector: str) -> Any:
@@ -48,3 +53,22 @@ def suppress(exception, default=None):
         return wrapper_suppress
 
     return decorator_suppress
+
+
+@dataclass()
+class deferedRender:
+    template: str
+    args: dict[str, Any]
+
+    def __str__(self) -> str:
+        env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
+        template = env.from_string(self.template)
+        return template.render(self.args)
+
+
+@dataclass
+class deferedRenderURL(deferedRender):
+    base_url: str
+
+    def __str__(self) -> str:
+        return urljoin(self.base_url, super().__str__())

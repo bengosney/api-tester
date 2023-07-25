@@ -10,7 +10,7 @@ from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Text
 
 # First Party
 from apitester.auth import auth
-from apitester.config import BearerAuthConf, URLConf, api_config
+from apitester.config import BearerAuthConf, api_config
 from apitester.url import URL
 from apitester.utils import extract
 from apitester.widgets import Endpoint
@@ -82,7 +82,7 @@ class LoginScreen(Screen):
                     "username": self.username_input.value,
                     "password": self.password_input.value,
                 }
-                async with session.post(self.auth.url, data={**post_data}) as response:
+                async with session.post(str(self.auth.url), data={**post_data}) as response:
                     json = await response.json()
                     auth["token"] = extract(json, self.auth.token_path)
 
@@ -110,8 +110,8 @@ class APITester(App):
                     build_tree(val, node.add(key))
                 elif isinstance(val, str):
                     node.add_leaf(f"{key} - {val}", data={"url": URL(val)})
-                elif isinstance(val, URLConf):
-                    node.add_leaf(f"{key} - {val.url}", data={"url": URL(url=val.url, method=val.method, fields=val.fields)})
+                else:
+                    node.add_leaf(f"{key} - {val.url}", data={"url": val})
 
         build_tree(api_config.urls, tree.root)
 
