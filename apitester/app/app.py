@@ -111,7 +111,7 @@ class APITester(App):
                 elif isinstance(val, str):
                     node.add_leaf(f"{key} - {val}", data={"url": URL(val)})
                 elif isinstance(val, URLConf):
-                    node.add_leaf(f"{key} - {val.url}", data={"url": URL(url=val.url, method=val.method)})
+                    node.add_leaf(f"{key} - {val.url}", data={"url": URL(url=val.url, method=val.method, fields=val.fields)})
 
         build_tree(api_config.urls, tree.root)
 

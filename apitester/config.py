@@ -34,6 +34,7 @@ AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthCont
 class URLConf(BaseModel):
     url: str
     method: Literal["GET", "POST"]
+    fields: list[str] = []
 
 
 URLConfType = str | URLConf

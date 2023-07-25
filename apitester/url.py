@@ -1,5 +1,5 @@
 # Standard Library
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import Literal
 from urllib.parse import urljoin
@@ -17,6 +17,7 @@ env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
 class URL:
     url: str
     method: Literal["GET", "POST"] = "GET"
+    fields: list[str] = field(default_factory=list)
 
     def __hash__(self) -> int:
         return hash((self.url, self.method))
@@ -28,6 +29,9 @@ class URL:
         url = env.from_string(self.url)
         return urljoin(api_config.settings.base_url, url.render(self._data))
 
+    def __repr__(self) -> str:
+        return f"<{self.method}> - {self.url} [{[f for f in self.fields]}]"
+
     def __setitem__(self, name: str, value: str) -> None:
         self._data[name] = value
 
@@ -37,7 +41,7 @@ class URL:
     @lru_cache
     def variables(self) -> set[str]:
         ast = env.parse(self.url)
-        return meta.find_undeclared_variables(ast)
+        return meta.find_undeclared_variables(ast) | set(self.fields)
 
     @property
     def variable_count(self) -> int:

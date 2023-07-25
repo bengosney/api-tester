@@ -78,7 +78,9 @@ class Endpoint(Static):
             async with aiohttp.ClientSession(headers=headers) as session:
                 try:
                     method = self.url.method.lower()
-                    async with getattr(session, method)(str(self.url)) as response:
+                    data = [self.url[f] for f in self.url.fields]
+
+                    async with getattr(session, method)(str(self.url), data=data) as response:
                         if "json" in response.content_type:
                             data = await response.json()
                         else:
