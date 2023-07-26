@@ -78,7 +78,7 @@ class Endpoint(Static):
             async with aiohttp.ClientSession(headers=headers) as session:
                 try:
                     method = self.url.method.lower()
-                    data = [self.url[f] for f in self.url.fields]
+                    data = {f: self.url[f] for f in self.url.fields}
 
                     async with getattr(session, method)(str(self.url), data=data) as response:
                         if "json" in response.content_type:
@@ -88,4 +88,4 @@ class Endpoint(Static):
                             data = data.replace("\\n", "\n").replace("\\t", "\t")
                         output.update(data)
                 except Exception as e:
-                    output.update(e.__dict__)
+                    output.update({"exception": type(e), "message": str(e), "dict": e.__dict__})
