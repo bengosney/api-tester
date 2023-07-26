@@ -30,7 +30,7 @@ class URL:
         return urljoin(config.api_config.settings.base_url, url.render(self._data))
 
     def __repr__(self) -> str:
-        return f"<{self.method}> - {self.url} [{[f for f in self.fields]}]"
+        return f"<{self.method}> - {self.url} {[f for f in self.fields]}"
 
     def __setitem__(self, name: str, value: str) -> None:
         self._data[name] = value
