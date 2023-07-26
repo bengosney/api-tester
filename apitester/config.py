@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings
 
 # First Party
 from apitester.url import URL
-from apitester.utils import deferedRenderURL
+from apitester.utils import deferedURLRender
 
 
 class Settings(BaseSettings):
@@ -45,9 +45,7 @@ class ApiConf(BaseModel):
         super().__init__(*args, **kwargs)
 
         if hasattr(self.auth, "url"):
-            self.auth.url = deferedRenderURL(
-                template=getattr(self.auth, "url", ""), args={"urls": self.urls}, base_url=self.settings.base_url
-            )
+            self.auth.url = deferedURLRender(getattr(self.auth, "url", ""), {"urls": self.urls}, self.settings.base_url)
 
     @property
     def settings(self) -> Settings:

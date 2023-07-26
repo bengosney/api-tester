@@ -1,7 +1,6 @@
 # Standard Library
 import functools
 from contextlib import suppress as ctx_suppress
-from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urljoin
 
@@ -55,20 +54,21 @@ def suppress(exception, default=None):
     return decorator_suppress
 
 
-@dataclass()
-class deferedRender:
-    template: str
-    args: dict[str, Any]
+def deferedURLRender(template: str, args: dict[str, Any], base_url: str) -> str:
+    class _proxy(str):
+        template: str
+        args: dict[str, Any]
+        base_url: str
 
-    def __str__(self) -> str:
-        env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
-        template = env.from_string(self.template)
-        return template.render(self.args)
+        def __str__(self) -> str:
+            env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
+            template = env.from_string(self.template)
+            rendered = template.render(self.args)
+            return urljoin(self.base_url, rendered)
 
+    proxy = _proxy()
+    proxy.template = template
+    proxy.args = args
+    proxy.base_url = base_url
 
-@dataclass
-class deferedRenderURL(deferedRender):
-    base_url: str
-
-    def __str__(self) -> str:
-        return urljoin(self.base_url, super().__str__())
+    return proxy

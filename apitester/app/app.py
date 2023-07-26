@@ -82,7 +82,7 @@ class LoginScreen(Screen):
                     "username": self.username_input.value,
                     "password": self.password_input.value,
                 }
-                async with session.post(str(self.auth.url), data={**post_data}) as response:
+                async with session.post(self.auth.url, data={**post_data}) as response:
                     json = await response.json()
                     auth["token"] = extract(json, self.auth.token_path)
 
