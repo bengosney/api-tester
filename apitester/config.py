@@ -3,7 +3,8 @@ import tomllib
 from typing import Literal
 
 # Third Party
-from pydantic import BaseModel, BaseSettings
+from pydantic import BaseModel
+from pydantic_settings import BaseSettings
 
 # First Party
 from apitester.url import URL

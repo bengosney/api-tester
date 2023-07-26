@@ -60,8 +60,3 @@ repos:
   rev: 0.2.2
   hooks:
   - id: checkmake
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.0.280
-  hooks:
-  - id: ruff
-    args: [--fix, --exit-non-zero-on-fix]
