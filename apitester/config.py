@@ -3,7 +3,7 @@ import tomllib
 from typing import Annotated, Literal
 
 # Third Party
-from pydantic import BaseModel, BeforeValidator
+from pydantic import BaseModel, BeforeValidator, ValidationError, WrapValidator
 from pydantic_settings import BaseSettings
 
 # First Party
@@ -33,8 +33,18 @@ class NoAuthConf(BaseModel):
 
 AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthConf
 
+
+def validate_urldict(v, handler):
+    passed = handler(v)
+    if "url" in passed:
+        raise ValidationError()
+
+    return passed
+
+
 URLType = Annotated[URL, BeforeValidator(lambda x: URL(x) if type(x) == str else x)]
-URLConf = dict[str, URLType | dict[str, URLType]]
+URLDict = Annotated[dict[str, URLType], WrapValidator(validate_urldict)]
+URLConf = dict[str, URLType | dict[str, URLType | URLDict]]
 
 
 class ApiConf(BaseModel):
