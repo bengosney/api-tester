@@ -11,7 +11,6 @@ from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Text
 # First Party
 from apitester.auth import auth
 from apitester.config import BearerAuthConf, api_config
-from apitester.url import URL
 from apitester.utils import extract
 from apitester.widgets import Endpoint
 
@@ -108,8 +107,6 @@ class APITester(App):
             for key, val in items.items():
                 if isinstance(val, dict):
                     build_tree(val, node.add(key))
-                elif isinstance(val, str):
-                    node.add_leaf(f"{key} - {val}", data={"url": URL(val)})
                 else:
                     node.add_leaf(f"{key} - {val.url}", data={"url": val})
 

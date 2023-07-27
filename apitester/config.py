@@ -1,9 +1,9 @@
 # Standard Library
 import tomllib
-from typing import Literal
+from typing import Annotated, Literal
 
 # Third Party
-from pydantic import BaseModel
+from pydantic import BaseModel, BeforeValidator
 from pydantic_settings import BaseSettings
 
 # First Party
@@ -33,13 +33,13 @@ class NoAuthConf(BaseModel):
 
 AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthConf
 
-
-URLConfType = str | URL
+URLType = Annotated[URL, BeforeValidator(lambda x: URL(x) if type(x) == str else x)]
+URLConf = dict[str, URLType | dict[str, URLType]]
 
 
 class ApiConf(BaseModel):
     auth: AuthConf = NoAuthConf()
-    urls: dict[str, URLConfType | dict[str, URLConfType]]
+    urls: URLConf
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
