@@ -10,7 +10,7 @@ from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Text
 
 # First Party
 from apitester.auth import auth
-from apitester.config import BearerAuthConf, api_config
+from apitester.config import BearerAuthConf, config
 from apitester.utils import extract
 from apitester.widgets import Endpoint
 
@@ -110,7 +110,7 @@ class APITester(App):
                 else:
                     node.add_leaf(f"{key} - {val.url}", data={"url": val})
 
-        build_tree(api_config.urls, tree.root)
+        build_tree(config.urls, tree.root)
 
         tree.root.expand_all()
 
@@ -119,7 +119,7 @@ class APITester(App):
         with Vertical():
             with Horizontal(id="main-pane"):
                 with Container(id="left-pane"):
-                    if api_config.auth.type != "none":
+                    if config.auth.type != "none":
                         yield Button("Auth", id="auth")
                     yield Label("URL List")
                     with VerticalScroll():
@@ -144,9 +144,9 @@ class APITester(App):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
             case "auth":
-                if api_config.auth.type == "bearer":
-                    self.push_screen(LoginScreen(api_config.auth))
-                if api_config.auth.type == "header":
+                if config.auth.type == "bearer":
+                    self.push_screen(LoginScreen(config.auth))
+                if config.auth.type == "header":
                     self.push_screen(APIKeyScreen())
             case "clear-debug":
                 self.debug_log_clear()

@@ -1,6 +1,6 @@
 # Standard Library
 import tomllib
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 # Third Party
 from pydantic import BaseModel, BeforeValidator, ValidationError, WrapValidator
@@ -47,13 +47,11 @@ URLDict = Annotated[dict[str, URLType], WrapValidator(validate_urldict)]
 URLConf = dict[str, URLType | dict[str, URLType | URLDict]]
 
 
-class ApiConf(BaseModel):
+class ConfigModel(BaseModel):
     auth: AuthConf = NoAuthConf()
     urls: URLConf
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
+    def model_post_init(self, __context: Any) -> None:
         if hasattr(self.auth, "url"):
             self.auth.url = deferedURLRender(getattr(self.auth, "url", ""), {"urls": self.urls}, self.settings.base_url)
 
@@ -69,8 +67,21 @@ class ApiConf(BaseModel):
         return f"apt-test:{self.settings.base_url}"
 
 
-with open("api-conf.toml") as f:
-    content = f.read()
-    raw_api_conf = tomllib.loads(content)
+class Config:
+    api_conf = None
 
-api_config = ApiConf(**raw_api_conf)
+    def __init__(self) -> None:
+        self.load()
+
+    def load(self, file: str = "api-conf.toml") -> None:
+        with open(file) as f:
+            content = f.read()
+            raw_api_conf = tomllib.loads(content)
+
+        self.api_conf = ConfigModel(**raw_api_conf)
+
+    def __getattr__(self, __name: str) -> Any:
+        return getattr(self.api_conf, __name)
+
+
+config = Config()

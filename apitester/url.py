@@ -27,7 +27,7 @@ class URL:
 
     def __str__(self) -> str:
         url = env.from_string(self.url)
-        return urljoin(config.api_config.settings.base_url, url.render(self._data))
+        return urljoin(config.config.settings.base_url, url.render(self._data))
 
     def __repr__(self) -> str:
         return f"<{self.method}> - {self.url} {[f for f in self.fields]}"

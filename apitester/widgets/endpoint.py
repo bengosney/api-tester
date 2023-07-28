@@ -10,7 +10,7 @@ from textual.widgets import Button, Input, Label, Pretty, Static
 
 # First Party
 from apitester.auth import auth
-from apitester.config import api_config
+from apitester.config import config
 from apitester.data import DataStore
 from apitester.url import URL
 from apitester.widgets.loader import Loader
@@ -68,11 +68,11 @@ class Endpoint(Static):
         headers = {"accept": "application/json"}
 
         with suppress(KeyError):
-            match api_config.auth.type:
+            match config.auth.type:
                 case "bearer":
                     headers["Authorization"] = f"Bearer {auth['token']}"
                 case "header":
-                    headers[getattr(api_config.auth, "key")] = auth["api_key"]
+                    headers[getattr(config.auth, "key")] = auth["api_key"]
 
         if type(output := self.query_one("#get-response")) == Pretty:
             async with aiohttp.ClientSession(headers=headers) as session:
