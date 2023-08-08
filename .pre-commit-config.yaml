@@ -17,7 +17,7 @@ repos:
   - id: mixed-line-ending
     args: [--fix, lf]
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.9.0
+  rev: v3.10.1
   hooks:
   - id: pyupgrade
     args: [--py310-plus]
@@ -31,7 +31,7 @@ repos:
   - id: docformatter
     args: [--in-place]
 - repo: https://github.com/hadialqattan/pycln
-  rev: v2.1.6
+  rev: v2.2.1
   hooks:
   - id: pycln
     args: [--config=pyproject.toml]
@@ -48,7 +48,7 @@ repos:
   hooks:
   - id: autoflake
 - repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
+  rev: 6.1.0
   hooks:
   - id: flake8
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
