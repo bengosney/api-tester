@@ -77,3 +77,9 @@ upgrade: $(PIP_PATH) $(WHEEL_PATH) $(PIP_SYNC_PATH)
 	@echo "Upgrading pip packages"
 	@python -m piptools compile -q --upgrade pyproject.toml
 	@python -m pre_commit autoupdate
+
+dev:
+	textual run --dev apitester.app:run
+
+console:
+	textual console -x EVENT

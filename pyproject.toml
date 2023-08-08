@@ -6,7 +6,7 @@ authors = [{ name = "Ben Gosney", email = "bengosney@googlemail.com" }]
 dependencies = ["textual", "pydantic", "pydantic-settings", "keyring", "Jinja2", "tinydb", "aiohttp[speedups]"]
 
 [project.optional-dependencies]
-dev = ["black", "mypy", "pip-tools", "pre-commit", "textual[dev]", "icecream"]
+dev = ["black", "mypy", "pip-tools", "pre-commit", "textual-dev", "icecream"]
 
 [project.scripts]
 apitester = "apitester:app.run"
