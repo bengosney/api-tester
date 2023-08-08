@@ -1,4 +1,5 @@
 # Standard Library
+import os
 import tomllib
 from typing import Annotated, Any, Literal
 
@@ -42,7 +43,7 @@ def validate_urldict(v, handler):
     return passed
 
 
-URLType = Annotated[URL, BeforeValidator(lambda x: URL(x) if type(x) == str else x)]
+URLType = Annotated[URL, BeforeValidator(lambda x: URL(x) if type(x) is str else x)]
 URLDict = Annotated[dict[str, URLType], WrapValidator(validate_urldict)]
 URLConf = dict[str, URLType | dict[str, URLType | URLDict]]
 
@@ -68,17 +69,28 @@ class ConfigModel(BaseModel):
 
 
 class Config:
-    api_conf = None
+    path: str
+    _st_mtime: float
+    api_conf: ConfigModel | None = None
 
-    def __init__(self) -> None:
+    def __init__(self, path: str = "api-conf.toml") -> None:
+        self.path = path
         self.load()
 
-    def load(self, file: str = "api-conf.toml") -> None:
-        with open(file) as f:
+    def load(self) -> None:
+        with open(self.path) as f:
             content = f.read()
             raw_api_conf = tomllib.loads(content)
 
         self.api_conf = ConfigModel(**raw_api_conf)
+        self._st_mtime = os.stat(self.path).st_mtime
+
+    def check_reload(self):
+        if self._st_mtime == os.stat(self.path).st_mtime:
+            return False
+
+        self.load()
+        return True
 
     def __getattr__(self, __name: str) -> Any:
         return getattr(self.api_conf, __name)

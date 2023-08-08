@@ -1,18 +1,17 @@
 # Standard Library
-from datetime import datetime
 
 # Third Party
 import aiohttp
 from textual.app import App, ComposeResult
 from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
-from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, TextLog, Tree
+from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Tree
 
 # First Party
 from apitester.auth import auth
 from apitester.config import BearerAuthConf, config
 from apitester.utils import extract
-from apitester.widgets import Endpoint
+from apitester.widgets import Endpoint, URLTree
 
 
 class APIKeyScreen(Screen):
@@ -95,24 +94,11 @@ class APITester(App):
 
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
-        ("l", "toggle_debug", "Toggle debug log"),
+        ("r", "reload_config", "Reload Config"),
     ]
 
-    show_debug = False
-
     def compose(self) -> ComposeResult:
-        tree: Tree[dict] = Tree("URLs")
-
-        def build_tree(items: dict, node):
-            for key, val in items.items():
-                if isinstance(val, dict):
-                    build_tree(val, node.add(key))
-                else:
-                    node.add_leaf(f"{key} - {val.url}", data={"url": val})
-
-        build_tree(config.urls, tree.root)
-
-        tree.root.expand_all()
+        tree: URLTree = URLTree(config.urls)
 
         yield Header()
 
@@ -128,18 +114,14 @@ class APITester(App):
                     with VerticalScroll():
                         yield Container(id="query-container")
 
-            with Grid(id="debug-log-wrapper"):
-                with Container(id="debug-log-buttons"):
-                    yield TextLog(id="debug-log")
-                yield Button("Clear log", id="clear-debug")
         yield Footer()
+
+    def action_reload_config(self) -> None:
+        if config.check_reload():
+            self.query_one(URLTree).update(config.urls)
 
     def action_toggle_dark(self) -> None:
         self.dark = not self.dark
-
-    def action_toggle_debug(self) -> None:
-        self.show_debug = not self.show_debug
-        self.query_one("#debug-log-wrapper").styles.display = "block" if self.show_debug else "none"
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
@@ -148,30 +130,12 @@ class APITester(App):
                     self.push_screen(LoginScreen(config.auth))
                 if config.auth.type == "header":
                     self.push_screen(APIKeyScreen())
-            case "clear-debug":
-                self.debug_log_clear()
-
-    def debug_log_clear(self) -> None:
-        textlog = self.query_one("#debug-log")
-        if type(textlog) == TextLog:
-            textlog.clear()
-
-    def debug_log(self, msg: str, context=None) -> None:
-        textlog = self.query_one("#debug-log")
-        if type(textlog) == TextLog:
-            now = datetime.now()
-            textlog.write(f'{now.strftime("%H:%M.%S")}: {msg}')
-            if context:
-                textlog.write(context)
 
     def on_tree_node_selected(self, event: Tree.NodeSelected) -> None:
         if event.node.data:
-            self.debug_log(f'selected {event.node.data["url"]}', event.node.__dict__)
             qc = self.query_one("#query-container")
             qc.remove_children()
             qc.mount(Endpoint(event.node.data["url"]))
-        else:
-            self.debug_log("node has no url?")
 
 
 if __name__ == "__main__":
