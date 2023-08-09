@@ -3,10 +3,11 @@ from contextlib import suppress
 
 # Third Party
 import aiohttp
-from textual import on
+from textual import on, work
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.widgets import Button, Input, Label, Pretty, Static
+from textual.worker import Worker, WorkerState
 
 # First Party
 from apitester.auth import auth
@@ -18,6 +19,8 @@ from apitester.widgets.loader import Loader
 
 
 class Endpoint(Static):
+    loadingCount: int = 0
+
     def __init__(self, url: URL, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.url = url
@@ -45,13 +48,7 @@ class Endpoint(Static):
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
             case "get-url":
-                event.button.disabled = True
-
-                with Loader() as loader:
-                    self.query_one("#loader").mount(loader)
-                    await self.get_url()
-
-                event.button.disabled = False
+                self.get_url()
 
     @on(Input.Changed)
     def update_vars(self, event: Input.Changed) -> None:
@@ -65,6 +62,7 @@ class Endpoint(Static):
             if type(label := self.query_one("#url-label")) == Label:
                 label.update(str(self.url))
 
+    @work()
     async def get_url(self):
         headers = {"accept": "application/json"}
 
@@ -90,3 +88,20 @@ class Endpoint(Static):
                         output.update(data)
                 except Exception as e:
                     output.update({"exception": type(e), "message": str(e), "dict": e.__dict__})
+
+    def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
+        match event.state:
+            case WorkerState.RUNNING:
+                if self.loadingCount == 0:
+                    self.query_one("#loader").mount(Loader())
+                self.loadingCount += 1
+
+                if event.worker.name == "get_url":
+                    self.query_one("#get-url").disabled = True
+            case WorkerState.SUCCESS:
+                self.loadingCount -= 1
+                if self.loadingCount == 0:
+                    self.query_one("#loader").remove_children()
+
+                    if event.worker.name == "get_url":
+                        self.query_one("#get-url").disabled = False
