@@ -13,6 +13,7 @@ from apitester.auth import auth
 from apitester.config import config
 from apitester.data import DataStore
 from apitester.url import URL
+from apitester.widgets.labels import AdvancedLabel
 from apitester.widgets.loader import Loader
 
 
@@ -24,7 +25,7 @@ class Endpoint(Static):
 
     def compose(self) -> ComposeResult:
         self.styles.padding = 1
-        yield Label(f"URL: {self.url}", id="url-label")
+        yield AdvancedLabel(f"{self.url}", prefix="URL: ", id="url-label")
         yield Label(f"Method: {self.url.method}", id="method-label")
         yield Static(id="loader")
 
@@ -54,7 +55,7 @@ class Endpoint(Static):
 
     @on(Input.Changed)
     def update_vars(self, event: Input.Changed) -> None:
-        if type(self.url) == URL:
+        if type(self.url) is URL:
             for field in self.url.variables():
                 id = f"{field}-input"
                 if type(input := self.query_one(f"#{id}")) == Input:
