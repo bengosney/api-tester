@@ -4,7 +4,7 @@
 import aiohttp
 from textual.app import App, ComposeResult
 from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
-from textual.screen import Screen
+from textual.screen import ModalScreen, Screen
 from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Tree
 
 # First Party
@@ -43,7 +43,7 @@ class APIKeyScreen(Screen):
         self.app.pop_screen()
 
 
-class LoginScreen(Screen):
+class LoginScreen(ModalScreen):
     BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
 
     def __init__(self, auth: BearerAuthConf, *args, **kwargs) -> None:
