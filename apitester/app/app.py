@@ -86,7 +86,7 @@ class LoginScreen(ModalScreen):
                     json = await response.json()
                     auth["token"] = extract(json, self.auth.token_path)
 
-        self.app.pop_screen()
+        self.dismiss()
 
 
 class QuitScreen(ModalScreen[bool]):
@@ -109,20 +109,42 @@ class QuitScreen(ModalScreen[bool]):
             self.dismiss(False)
 
 
-class AddURLScreen(ModalScreen):
+class AddURLScreen(ModalScreen[bool]):
     BINDINGS = [("escape", "app.pop_screen", "Cancel")]
 
     def compose(self) -> ComposeResult:
+        self.inputs = {
+            "name": Input(id="name"),
+            "url": Input(id="url"),
+            "method": Select(
+                [(m, m) for m in get_args(URLMethod)], allow_blank=False, value=get_args(URLMethod)[0], id="method"
+            ),
+        }
+
         with Grid(id="dialog"):
             with Grid(id="dialog-inputs"):
                 yield Label("Add new URL", id="question")
+                yield Label("Name")
+                yield self.inputs["name"]
                 yield Label("URL")
-                yield Input(id="URL")
+                yield self.inputs["url"]
                 yield Label("Method")
-                yield Select([(m, m) for m in get_args(URLMethod)], allow_blank=False, value=get_args(URLMethod)[0])
+                yield self.inputs["method"]
             with Grid(id="dialog-buttons"):
-                yield Button("Add", variant="primary", id="do_add")
+                yield Button("Add", variant="primary", id="add_url")
                 yield Button("Cancel", id="cancel")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "add_url":
+            name = self.inputs["name"].value
+            url = self.inputs["url"].value
+            method = self.inputs["method"].value
+
+            if all([i is not None for i in [name, url, method]]) and method in get_args(URLMethod):
+                config.add_url(name, url, method)
+                self.dismiss(True)
+        else:
+            self.dismiss(False)
 
 
 class APITester(App):
@@ -131,7 +153,7 @@ class APITester(App):
     CSS_PATH = "../styles/main.css"
 
     BINDINGS = [
-        ("q", "quit", "Quit"),
+        ("q", "try_quit", "Quit"),
         ("d", "toggle_dark", "Toggle dark mode"),
         ("r", "reload_config", "Reload Config"),
         ("a", "add_url", "Add a url"),
@@ -158,7 +180,14 @@ class APITester(App):
 
     def action_reload_config(self) -> None:
         if config.check_reload():
-            self.query_one(URLTree).update(config.urls)
+            self._reload()
+
+    def _reload(self) -> None:
+        self.log("bob?")
+        if t := self.query_one(URLTree):
+            t.update(config.urls)
+            self.log(config)
+            self.log(config.urls)
 
     def action_toggle_dark(self) -> None:
         self.dark = not self.dark
@@ -178,9 +207,9 @@ class APITester(App):
             qc.mount(Endpoint(event.node.data["url"]))
 
     def action_add_url(self):
-        self.push_screen(AddURLScreen())
+        self.push_screen(AddURLScreen(), lambda _: self._reload())
 
-    def action_quit(self) -> None:
+    def action_try_quit(self) -> None:
         """Action to display the quit dialog."""
 
         def check_quit(quit: bool) -> None:

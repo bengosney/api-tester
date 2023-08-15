@@ -8,6 +8,7 @@ from pydantic import BaseModel, BeforeValidator, ValidationError, WrapValidator
 from pydantic_settings import BaseSettings
 
 # First Party
+from apitester.types import URLMethod
 from apitester.url import URL
 from apitester.utils import deferedURLRender
 
@@ -91,6 +92,10 @@ class Config:
 
         self.load()
         return True
+
+    def add_url(self, name: str, url: str, method: URLMethod):
+        if self.api_conf is not None:
+            self.api_conf.urls[name] = URL(url=url, method=method)
 
     def __getattr__(self, __name: str) -> Any:
         return getattr(self.api_conf, __name)
