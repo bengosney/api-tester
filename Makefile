@@ -66,7 +66,7 @@ init: .direnv .git/hooks/pre-commit $(PIP_SYNC_PATH) requirements.dev.txt ## Ini
 clean: ## Remove all build files
 	find . -name '*.pyc' -delete
 	find . -type d -name '__pycache__' -delete
-	rm -rf .pytest_cache
+	rm -rf .pytest_cache .ruff_cache build .mypy_cache
 	rm -f .testmondata
 
 install: $(PIP_SYNC_PATH) requirements.txt $(REQS) ## Install development requirements (default)
