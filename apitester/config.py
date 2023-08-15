@@ -97,6 +97,9 @@ class Config:
         if self.api_conf is not None:
             self.api_conf.urls[name] = URL(url=url, method=method)
 
+        with open(self.path, "a") as f:
+            f.write(f'\n# {name} = {{ url = "{url}", method = "{method}" }}')
+
     def __getattr__(self, __name: str) -> Any:
         return getattr(self.api_conf, __name)
 

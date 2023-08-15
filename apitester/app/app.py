@@ -114,8 +114,8 @@ class AddURLScreen(ModalScreen[bool]):
 
     def compose(self) -> ComposeResult:
         self.inputs = {
-            "name": Input(id="name"),
-            "url": Input(id="url"),
+            "name": Input(id="name", value="bob"),
+            "url": Input(id="url", value="/bob"),
             "method": Select(
                 [(m, m) for m in get_args(URLMethod)], allow_blank=False, value=get_args(URLMethod)[0], id="method"
             ),
@@ -183,11 +183,8 @@ class APITester(App):
             self._reload()
 
     def _reload(self) -> None:
-        self.log("bob?")
-        if t := self.query_one(URLTree):
-            t.update(config.urls)
-            self.log(config)
-            self.log(config.urls)
+        if tree := self.query_one(URLTree):
+            tree.update(config.urls)
 
     def action_toggle_dark(self) -> None:
         self.dark = not self.dark
@@ -207,7 +204,7 @@ class APITester(App):
             qc.mount(Endpoint(event.node.data["url"]))
 
     def action_add_url(self):
-        self.push_screen(AddURLScreen(), lambda _: self._reload())
+        self.push_screen(AddURLScreen(), lambda ok: self._reload() if ok else None)
 
     def action_try_quit(self) -> None:
         """Action to display the quit dialog."""
