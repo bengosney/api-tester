@@ -1,7 +1,6 @@
 # Standard Library
 from dataclasses import dataclass, field
 from functools import lru_cache
-from typing import Literal
 from urllib.parse import urljoin
 
 # Third Party
@@ -9,6 +8,7 @@ from jinja2 import BaseLoader, Environment, meta, select_autoescape
 
 # First Party
 from apitester import config
+from apitester.types import URLMethod
 
 env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
 
@@ -16,7 +16,7 @@ env = Environment(loader=BaseLoader(), autoescape=select_autoescape())
 @dataclass()
 class URL:
     url: str
-    method: Literal["GET", "POST"] = "GET"
+    method: URLMethod = "GET"
     fields: list[str] = field(default_factory=list)
 
     def __hash__(self) -> int:

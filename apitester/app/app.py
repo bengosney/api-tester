@@ -1,21 +1,23 @@
 # Standard Library
+from typing import get_args
 
 # Third Party
 import aiohttp
 from textual.app import App, ComposeResult
 from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
 from textual.screen import ModalScreen, Screen
-from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Tree
+from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Select, Tree
 
 # First Party
 from apitester.auth import auth
 from apitester.config import BearerAuthConf, config
+from apitester.types import URLMethod
 from apitester.utils import extract
 from apitester.widgets import Endpoint, URLTree
 
 
 class APIKeyScreen(Screen):
-    BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
+    BINDINGS = [("escape", "app.pop_screen", "Cancel")]
 
     def compose(self) -> ComposeResult:
         self.api_key_input = Input(id="username", value=auth.get("api_key"))
@@ -87,14 +89,52 @@ class LoginScreen(ModalScreen):
         self.app.pop_screen()
 
 
+class QuitScreen(ModalScreen[bool]):
+    """Screen with a dialog to quit."""
+
+    BINDINGS = [("escape", "app.pop_screen", "Cancel")]
+
+    def compose(self) -> ComposeResult:
+        with Grid(id="dialog"):
+            with Grid(id="dialog-inputs"):
+                yield Label("Are you sure you want to quit?", id="question")
+            with Grid(id="dialog-buttons"):
+                yield Button("Quit", variant="error", id="quit")
+                yield Button("Cancel", variant="primary", id="cancel")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "quit":
+            self.dismiss(True)
+        else:
+            self.dismiss(False)
+
+
+class AddURLScreen(ModalScreen):
+    BINDINGS = [("escape", "app.pop_screen", "Cancel")]
+
+    def compose(self) -> ComposeResult:
+        with Grid(id="dialog"):
+            with Grid(id="dialog-inputs"):
+                yield Label("Add new URL", id="question")
+                yield Label("URL")
+                yield Input(id="URL")
+                yield Label("Method")
+                yield Select([(m, m) for m in get_args(URLMethod)], allow_blank=False, value=get_args(URLMethod)[0])
+            with Grid(id="dialog-buttons"):
+                yield Button("Add", variant="primary", id="do_add")
+                yield Button("Cancel", id="cancel")
+
+
 class APITester(App):
     """Small, Simple API Tester."""
 
     CSS_PATH = "../styles/main.css"
 
     BINDINGS = [
+        ("q", "quit", "Quit"),
         ("d", "toggle_dark", "Toggle dark mode"),
         ("r", "reload_config", "Reload Config"),
+        ("a", "add_url", "Add a url"),
     ]
 
     def compose(self) -> ComposeResult:
@@ -136,6 +176,19 @@ class APITester(App):
             qc = self.query_one("#query-container")
             qc.remove_children()
             qc.mount(Endpoint(event.node.data["url"]))
+
+    def action_add_url(self):
+        self.push_screen(AddURLScreen())
+
+    def action_quit(self) -> None:
+        """Action to display the quit dialog."""
+
+        def check_quit(quit: bool) -> None:
+            """Called when QuitScreen is dismissed."""
+            if quit:
+                self.exit()
+
+        self.push_screen(QuitScreen(), check_quit)
 
 
 if __name__ == "__main__":
