@@ -1,8 +1,9 @@
 # Standard Library
-from typing import get_args
+from typing import Literal, get_args
 
 # Third Party
 import aiohttp
+from pydantic import BaseModel
 from textual.app import App, ComposeResult
 from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
 from textual.screen import ModalScreen, Screen
@@ -13,7 +14,17 @@ from apitester.auth import auth
 from apitester.config import BearerAuthConf, config
 from apitester.types import URLMethod
 from apitester.utils import extract
-from apitester.widgets import Endpoint, URLTree
+from apitester.widgets import Endpoint, Form, URLTree
+
+
+class User(BaseModel):
+    id: int
+    name: str
+    active: bool = True
+    other: str = "foobar"
+    bob: Literal["bob", "pop", "rat"] = "bob"
+    numbers: Literal[1, 2, 3]
+    req: str | None
 
 
 class APIKeyScreen(Screen):
@@ -174,7 +185,8 @@ class APITester(App):
                         yield tree
                 with Container():
                     with VerticalScroll():
-                        yield Container(id="query-container")
+                        with Container(id="query-container"):
+                            yield Form(User)
 
         yield Footer()
 
