@@ -114,8 +114,8 @@ class AddURLScreen(ModalScreen[bool]):
 
     def compose(self) -> ComposeResult:
         self.inputs = {
-            "name": Input(id="name", value="bob"),
-            "url": Input(id="url", value="/bob"),
+            "name": Input(id="name"),
+            "url": Input(id="url"),
             "method": Select(
                 [(m, m) for m in get_args(URLMethod)], allow_blank=False, value=get_args(URLMethod)[0], id="method"
             ),
