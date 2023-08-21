@@ -25,13 +25,13 @@ help: ## Display this help
 	pre-commit autoupdate
 	@touch $@
 
-requirements.%.txt: $(PIP_SYNC_PATH) pyproject.toml
+requirements.%.txt: pyproject.toml $(PIP_SYNC_PATH) requirements.txt
 	@echo "Builing $@"
-	@python -m piptools compile --generate-hashes -q --extra $* -o $@ $(filter-out $<,$^)
+	python -m piptools compile --generate-hashes -q --extra $* -c requirements.txt -o $@ $<
 
-requirements.txt: $(PIP_SYNC_PATH) pyproject.toml
+requirements.txt: pyproject.toml $(PIP_SYNC_PATH)
 	@echo "Builing $@"
-	@python -m piptools compile --generate-hashes -q $(filter-out $<,$^)
+	python -m piptools compile --generate-hashes -q $<
 
 .direnv: .envrc
 	@python -m ensurepip

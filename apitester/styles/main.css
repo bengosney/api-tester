@@ -85,3 +85,17 @@ Button {
 #url-label {
     text-style: bold;
 }
+
+.error {
+    color: $error;
+    text-style: bold;
+}
+
+Select.-invalid > SelectCurrent {
+    border: tall $error 60%;
+}
+
+.input-wrapper {
+    height: auto;
+    padding-bottom: 1;
+}
