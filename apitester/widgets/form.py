@@ -2,6 +2,7 @@
 from pydantic import BaseModel, ValidationError
 from textual.app import ComposeResult
 from textual.containers import Container
+from textual.message import Message
 from textual.validation import Length, Number
 from textual.widget import Widget
 from textual.widgets import Button, Input, Label, Select, Switch
@@ -9,6 +10,11 @@ from textual.widgets import Button, Input, Label, Select, Switch
 
 class Form(Widget):
     model: type[BaseModel]
+
+    class Submit(Message):
+        def __init__(self, model: BaseModel) -> None:
+            self.model = model
+            super().__init__()
 
     def __init__(self, model: type[BaseModel], *args, **kwargs) -> None:
         self.model = model
@@ -81,7 +87,7 @@ class Form(Widget):
 
             try:
                 model = self.model(**data)
-                self.log(model)
+                self.post_message(self.Submit(model))
             except ValidationError as e:
                 for error in e.errors():
                     self.log(error)

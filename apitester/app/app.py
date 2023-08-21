@@ -14,7 +14,7 @@ from apitester.auth import auth
 from apitester.config import BearerAuthConf, config
 from apitester.types import URLMethod
 from apitester.utils import extract
-from apitester.widgets import Endpoint, Form, URLTree
+from apitester.widgets import Endpoint, URLTree
 
 
 class User(BaseModel):
@@ -186,7 +186,7 @@ class APITester(App):
                 with Container():
                     with VerticalScroll():
                         with Container(id="query-container"):
-                            yield Form(User)
+                            pass
 
         yield Footer()
 
