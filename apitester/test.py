@@ -1,10 +1,16 @@
 # Third Party
-from icecream import ic
+from devtools import debug
 
 # First Party
 from apitester.app.app import User
 
-for id, field in User.model_fields.items():
-    ic(id)
+schema = User.model_json_schema()
+debug(schema)
 
-ic(User.model_fields.items())
+for id, field in schema["properties"].items():
+    field_types = []
+    field_types.append(field.get("type", None))
+    for _type in field.get("anyOf", []):
+        field_types.append(_type.get("type", None))
+    field_types = filter(lambda i: i is not None, field_types)
+    debug(field_types)
