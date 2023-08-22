@@ -50,6 +50,7 @@ Screen {
     grid-size: 2;
     grid-gutter: 1 2;
     grid-rows: 1fr 3;
+    height: 3;
 }
 
 #question {
@@ -95,7 +96,24 @@ Select.-invalid > SelectCurrent {
     border: tall $error 60%;
 }
 
+.form {
+    height: auto;
+}
+
 .input-wrapper {
     height: auto;
     padding-bottom: 1;
+}
+
+.input-wrapper > * {
+    height: auto;
+}
+
+.input-wrapper .error {
+    padding-left: 1;
+}
+
+.title {
+    width: 100%;
+    content-align: center middle;
 }

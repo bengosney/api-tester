@@ -4,7 +4,7 @@ from typing import Generic, Literal, TypeVar
 # Third Party
 from pydantic import BaseModel, ValidationError
 from textual.app import ComposeResult
-from textual.containers import Container
+from textual.containers import Container, Horizontal
 from textual.message import Message
 from textual.validation import Length, Number
 from textual.widget import Widget
@@ -22,17 +22,17 @@ class Form(Widget, Generic[T]):
             self.model = model
             super().__init__()
 
-    def __init__(self, model: type[T], show_submit: bool = True, *args, **kwargs) -> None:
+    def __init__(self, model: type[T], show_submit: bool = True, classes: str | None = None, *args, **kwargs) -> None:
         self.model = model
         self.show_submit = show_submit
-        super().__init__(*args, **kwargs)
+        super().__init__(classes=classes or "form", *args, **kwargs)
 
     def on_mount(self) -> None:
         self.styles.padding = 2
 
     def compose(self) -> ComposeResult:
         schema = self.model.model_json_schema()
-        yield Label(schema["title"])
+        yield Label(schema["title"], classes="title")
 
         for id, field in schema["properties"].items():
             _id = f"{id}_input"
@@ -70,8 +70,9 @@ class Form(Widget, Generic[T]):
 
             if _widget:
                 with Container(classes="input-wrapper"):
-                    yield Label(f"{field['title']}{'*' if required else ''}")
-                    yield Label("", id=f"{_id}_error", classes="error")
+                    with Horizontal():
+                        yield Label(f"{field['title']}{'*' if required else ''}", classes="input-label")
+                        yield Label("", id=f"{_id}_error", classes="error")
                     yield _widget
 
         if self.show_submit:
