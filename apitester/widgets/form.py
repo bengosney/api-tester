@@ -1,5 +1,5 @@
 # Standard Library
-from typing import Literal
+from typing import Generic, Literal, TypeVar
 
 # Third Party
 from pydantic import BaseModel, ValidationError
@@ -10,17 +10,19 @@ from textual.validation import Length, Number
 from textual.widget import Widget
 from textual.widgets import Button, Input, Label, Select, Switch
 
+T = TypeVar("T", bound=BaseModel)
 
-class Form(Widget):
-    model: type[BaseModel]
+
+class Form(Widget, Generic[T]):
+    model: type[T]
     show_submit: bool
 
     class Submit(Message):
-        def __init__(self, model: BaseModel) -> None:
+        def __init__(self, model: T) -> None:
             self.model = model
             super().__init__()
 
-    def __init__(self, model: type[BaseModel], show_submit: bool = True, *args, **kwargs) -> None:
+    def __init__(self, model: type[T], show_submit: bool = True, *args, **kwargs) -> None:
         self.model = model
         self.show_submit = show_submit
         super().__init__(*args, **kwargs)
@@ -75,7 +77,7 @@ class Form(Widget):
         if self.show_submit:
             yield Button("submit", id="submit")
 
-    def submit(self) -> BaseModel | Literal[False]:
+    def submit(self) -> T | Literal[False]:
         schema = self.model.model_json_schema()
         data = {}
         for id, _ in schema["properties"].items():

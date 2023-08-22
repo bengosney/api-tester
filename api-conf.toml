@@ -5,10 +5,7 @@ headers = ["username", "$password"]
 token_path = "data.token"
 
 [urls]
-auth = { url = "/admin/index.php?route=api/auth", fields = [
-    'username',
-    'password',
-], method = "POST" }
+auth = { url = "/admin/index.php?route=api/auth", fields = ['username', 'password'], method = "POST" }
 ping = "/admin/index.php?route=api/ping"
 option_ping = "/admin/index.php?route=api/ping"
 
