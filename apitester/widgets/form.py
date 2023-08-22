@@ -35,7 +35,6 @@ class Form(Widget, Generic[T]):
         yield Label(schema["title"])
 
         for id, field in schema["properties"].items():
-            required = id in schema["required"]
             _id = f"{id}_input"
 
             if "enum" in field:
@@ -45,6 +44,7 @@ class Form(Widget, Generic[T]):
             field_types.append(field.get("type", None))
             for _type in field.get("anyOf", []):
                 field_types.append(_type.get("type", None))
+            required = None not in field_types
             field_types = list(filter(lambda i: i is not None, field_types))
 
             _widget = None
