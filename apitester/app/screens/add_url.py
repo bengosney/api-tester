@@ -2,14 +2,22 @@
 from typing import get_args
 
 # Third Party
+from pydantic import BaseModel
 from textual.app import ComposeResult
 from textual.containers import Grid
 from textual.screen import ModalScreen
-from textual.widgets import Button, Input, Label, Select
+from textual.widgets import Button, Input, Select
 
 # First Party
 from apitester.config import config
 from apitester.types import URLMethod
+from apitester.widgets import Form
+
+
+class NewURL(BaseModel):
+    name: str
+    url: str
+    method: URLMethod = "GET"
 
 
 class AddURLScreen(ModalScreen[bool]):
@@ -25,26 +33,16 @@ class AddURLScreen(ModalScreen[bool]):
         }
 
         with Grid(id="dialog"):
-            with Grid(id="dialog-inputs"):
-                yield Label("Add new URL", id="question")
-                yield Label("Name")
-                yield self.inputs["name"]
-                yield Label("URL")
-                yield self.inputs["url"]
-                yield Label("Method")
-                yield self.inputs["method"]
+            yield Form(NewURL, show_submit=False, id="url_form")
             with Grid(id="dialog-buttons"):
                 yield Button("Add", variant="primary", id="add_url")
                 yield Button("Cancel", id="cancel")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "add_url":
-            name = self.inputs["name"].value
-            url = self.inputs["url"].value
-            method = self.inputs["method"].value
-
-            if all([i is not None for i in [name, url, method]]) and method in get_args(URLMethod):
-                config.add_url(name, url, method)
-                self.dismiss(True)
+            if type(form := self.query_one("#url_form")) == Form:
+                if url := form.submit():
+                    config.add_url(url.name, url.url, url.method)
+                    self.dismiss(True)
         else:
             self.dismiss(False)

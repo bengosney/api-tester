@@ -1,3 +1,6 @@
+# Standard Library
+from typing import Literal
+
 # Third Party
 from pydantic import BaseModel, ValidationError
 from textual.app import ComposeResult
@@ -10,14 +13,16 @@ from textual.widgets import Button, Input, Label, Select, Switch
 
 class Form(Widget):
     model: type[BaseModel]
+    show_submit: bool
 
     class Submit(Message):
         def __init__(self, model: BaseModel) -> None:
             self.model = model
             super().__init__()
 
-    def __init__(self, model: type[BaseModel], *args, **kwargs) -> None:
+    def __init__(self, model: type[BaseModel], show_submit: bool = True, *args, **kwargs) -> None:
         self.model = model
+        self.show_submit = show_submit
         super().__init__(*args, **kwargs)
 
     def on_mount(self) -> None:
@@ -67,33 +72,40 @@ class Form(Widget):
                     yield Label("", id=f"{_id}_error", classes="error")
                     yield _widget
 
-        yield Button("submit", id="submit")
+        if self.show_submit:
+            yield Button("submit", id="submit")
+
+    def submit(self) -> BaseModel | Literal[False]:
+        schema = self.model.model_json_schema()
+        data = {}
+        for id, _ in schema["properties"].items():
+            if input := self.query_one(f"#{id}_input"):
+                input.set_class(False, "-invalid")
+
+            if val := getattr(input or None, "value", None):
+                data[id] = val
+            else:
+                data[id] = None
+
+            if type(label := self.query_one(f"#{id}_input_error")) == Label:
+                label.update("")
+
+        try:
+            model = self.model(**data)
+            return model
+        except ValidationError as e:
+            for error in e.errors():
+                self.log(error)
+                for id in error["loc"]:
+                    if input := self.query_one(f"#{id}_input"):
+                        input.set_class(True, "-invalid")
+
+                    if type(label := self.query_one(f"#{id}_input_error")) == Label:
+                        label.update(error["msg"])
+
+        return False
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "submit":
-            schema = self.model.model_json_schema()
-            data = {}
-            for id, _ in schema["properties"].items():
-                if input := self.query_one(f"#{id}_input"):
-                    input.set_class(False, "-invalid")
-
-                if val := getattr(input or None, "value", None):
-                    data[id] = val
-                else:
-                    data[id] = None
-
-                if type(label := self.query_one(f"#{id}_input_error")) == Label:
-                    label.update("")
-
-            try:
-                model = self.model(**data)
+            if model := self.submit():
                 self.post_message(self.Submit(model))
-            except ValidationError as e:
-                for error in e.errors():
-                    self.log(error)
-                    for id in error["loc"]:
-                        if input := self.query_one(f"#{id}_input"):
-                            input.set_class(True, "-invalid")
-
-                        if type(label := self.query_one(f"#{id}_input_error")) == Label:
-                            label.update(error["msg"])
