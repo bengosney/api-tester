@@ -117,7 +117,7 @@ annotated-types==0.5.0 \
 asttokens==2.2.1 \
     --hash=sha256:4622110b2a6f30b77e1473affaa97e711bc2f07d3f10848420ff1898edbe94f3 \
     --hash=sha256:6b0ac9e93fb0335014d382b8fa9b3afa7df546984258005da0b9e7095b3deb1c
-    # via icecream
+    # via devtools
 async-timeout==4.0.3 \
     --hash=sha256:4640d96be84d82d02ed59ea2b7105a0f7b33abe8703703cd0ab0bf87c427522f \
     --hash=sha256:7405140ff1230c310e51dc27b3145b9092d659ce68ff733fb0cefe3ee42be028
@@ -403,10 +403,6 @@ click==8.1.6 \
     #   black
     #   pip-tools
     #   textual-dev
-colorama==0.4.6 \
-    --hash=sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44 \
-    --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6
-    # via icecream
 cryptography==41.0.3 \
     --hash=sha256:0d09fb5356f975974dbcb595ad2d178305e5050656affb7890a1583f5e02a306 \
     --hash=sha256:23c2d778cf829f7d0ae180600b17e9fceea3c2ef8b31a99e3c694cbbf3a24b84 \
@@ -434,6 +430,10 @@ cryptography==41.0.3 \
     # via
     #   -c requirements.txt
     #   secretstorage
+devtools==0.12.1 \
+    --hash=sha256:972ba41ed3655660f8b6952684d8b21e10d274617651c169aaaf0ad423ec4767 \
+    --hash=sha256:9cac86adec822108006dd6b1c54fa900fc96c0b7e4c8928680403cd33a557553
+    # via api-test (pyproject.toml)
 distlib==0.3.7 \
     --hash=sha256:2e24928bc811348f0feb63014e97aaae3037f2cf48712d51ae61df7fd6075057 \
     --hash=sha256:9dafe54b34a028eafd95039d5e5d4851a13734540f1331060d31c9916e7147a8
@@ -441,7 +441,7 @@ distlib==0.3.7 \
 executing==1.2.0 \
     --hash=sha256:0314a69e37426e3608aada02473b4161d4caf5a4b244d1d0c48072b8fee7bacc \
     --hash=sha256:19da64c18d2d851112f09c287f8d3dbbdf725ab0e569077efb6cdcbd3497c107
-    # via icecream
+    # via devtools
 filelock==3.12.2 \
     --hash=sha256:002740518d8aa59a26b0c76e10fb8c6e15eae825d34b6fdf670333fd7b938d81 \
     --hash=sha256:cbb791cdea2a72f23da6ac5b5269ab0a0d161e9ef0100e653b69049a7706d1ec
@@ -512,10 +512,6 @@ frozenlist==1.4.0 \
     #   -c requirements.txt
     #   aiohttp
     #   aiosignal
-icecream==2.1.3 \
-    --hash=sha256:0aa4a7c3374ec36153a1d08f81e3080e83d8ac1eefd97d2f4fe9544e8f9b49de \
-    --hash=sha256:757aec31ad4488b949bc4f499d18e6e5973c40cc4d4fc607229e78cfaec94c34
-    # via api-test (pyproject.toml)
 identify==2.5.26 \
     --hash=sha256:7243800bce2f58404ed41b7c002e53d4d22bcf3ae1b7900c2d7aefd95394bf7f \
     --hash=sha256:c22a8ead0d4ca11f1edd6c9418c3220669b3b7533ada0a0ffa6cc0ef85cf9b54
@@ -1031,7 +1027,7 @@ pygments==2.16.1 \
     --hash=sha256:1daff0494820c69bc8941e407aa20f577374ee88364ee10a98fdbe0aece96e29
     # via
     #   -c requirements.txt
-    #   icecream
+    #   devtools
     #   rich
 pyproject-hooks==1.0.0 \
     --hash=sha256:283c11acd6b928d2f6a7c73fa0d01cb2bdc5f07c57a2eeb6e83d5e56b97976f8 \
