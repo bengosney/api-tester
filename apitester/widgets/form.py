@@ -1,12 +1,14 @@
 # Standard Library
+from contextlib import suppress
 from typing import Generic, Literal, TypeVar
 
 # Third Party
 from pydantic import BaseModel, ValidationError
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
+from textual.css.query import QueryError
 from textual.message import Message
-from textual.validation import Length, Number
+from textual.validation import Integer, Length, Number
 from textual.widget import Widget
 from textual.widgets import Button, Input, Label, Select, Switch
 
@@ -24,6 +26,7 @@ class Form(Widget, Generic[T]):
 
     def __init__(self, model: type[T], show_submit: bool = True, classes: str | None = None, *args, **kwargs) -> None:
         self.model = model
+        self._schema = model.model_json_schema()
         self.show_submit = show_submit
         super().__init__(classes=classes or "form", *args, **kwargs)
 
@@ -31,7 +34,7 @@ class Form(Widget, Generic[T]):
         self.styles.padding = 2
 
     def compose(self) -> ComposeResult:
-        schema = self.model.model_json_schema()
+        schema = self._schema
         yield Label(schema["title"], classes="title")
 
         for id, field in schema["properties"].items():
@@ -40,12 +43,19 @@ class Form(Widget, Generic[T]):
             if "enum" in field:
                 field["type"] = "enum"
 
-            field_types = []
-            field_types.append(field.get("type", None))
+            field_types = set()
+            with suppress(KeyError):
+                field_types.add(field["type"])
+
             for _type in field.get("anyOf", []):
-                field_types.append(_type.get("type", None))
+                with suppress(KeyError):
+                    field_types.add(_type["type"])
+
             required = None not in field_types
             field_types = list(filter(lambda i: i is not None, field_types))
+
+            default = str(field.get("default", ""))
+            placeholder = "" if default == "" else f"Default: {default}"
 
             _widget = None
             match field_types:
@@ -56,15 +66,21 @@ class Form(Widget, Generic[T]):
                         zip(map(str, field["enum"]), field["enum"]),
                         id=_id,
                         allow_blank=(not required),
-                        value=field.get("default", ""),
+                        value=default,
                     )
                 case ["string", "null"]:
                     required = False
-                    _widget = Input(id=_id, validators=[], value=field.get("default", ""))
+                    _widget = Input(id=_id, validators=[], value=default, placeholder=placeholder)
                 case ["string"]:
-                    _widget = Input(id=_id, validators=[Length(1 if required else 0)], value=field.get("default", ""))
+                    _widget = Input(id=_id, validators=[Length(int(required))], value=default, placeholder=placeholder)
                 case ["integer"]:
-                    _widget = Input(id=_id, validators=[Number(), Length(1 if required else 0)], value=field.get("default", ""))
+                    _widget = Input(
+                        id=_id, validators=[Integer(), Length(int(required))], value=default, placeholder=placeholder
+                    )
+                case ["number"]:
+                    _widget = Input(
+                        id=_id, validators=[Number(), Length(int(required))], value=default, placeholder=placeholder
+                    )
                 case [unmatched]:
                     raise Exception(f"Unmatched: {unmatched}")
 
@@ -79,7 +95,7 @@ class Form(Widget, Generic[T]):
             yield Button("submit", id="submit")
 
     def submit(self) -> T | Literal[False]:
-        schema = self.model.model_json_schema()
+        schema = self._schema
         data = {}
         for id, _ in schema["properties"].items():
             if input := self.query_one(f"#{id}_input"):
@@ -98,13 +114,14 @@ class Form(Widget, Generic[T]):
             return model
         except ValidationError as e:
             for error in e.errors():
-                self.log(error)
                 for id in error["loc"]:
-                    if input := self.query_one(f"#{id}_input"):
-                        input.set_class(True, "-invalid")
+                    with suppress(QueryError):
+                        if input := self.query_one(f"#{id}_input"):
+                            input.set_class(True, "-invalid")
 
-                    if type(label := self.query_one(f"#{id}_input_error")) == Label:
-                        label.update(error["msg"])
+                    with suppress(QueryError):
+                        if type(label := self.query_one(f"#{id}_input_error")) == Label:
+                            label.update(error["msg"])
 
         return False
 
