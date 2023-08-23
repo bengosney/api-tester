@@ -1,5 +1,3 @@
-# Standard Library
-
 # Third Party
 from pydantic import BaseModel
 from textual.app import ComposeResult
