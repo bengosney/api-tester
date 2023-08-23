@@ -65,36 +65,28 @@ class Form(Widget, Generic[T]):
             required = None not in field_types
             field_types = list(filter(lambda i: i is not None, field_types))
 
-            default = self.inital.get(id, None) or str(field.get("default", ""))
-            placeholder = "" if default == "" else f"Default: {default}"
-            is_password = id in self.password_fields
+            default_args = {}
+            default_args["value"] = self.inital.get(id, None) or str(field.get("default", ""))
+            default_args["placeholder"] = "" if default_args["value"] == "" else f"Default: {default_args['value']}"
+            default_args["password"] = id in self.password_fields
+            default_args["validators"] = [Length(int(required))]
 
             _widget = None
             match field_types:
                 case ["boolean"]:
-                    _widget = Switch(id=_id, value=field.get("default", False))
+                    _widget = Switch(id=_id, value=bool(default_args["value"] if default_args["value"] != "" else False))
                 case ["enum"]:
-                    _widget = Select(
-                        zip(map(str, field["enum"]), field["enum"]),
-                        id=_id,
-                        allow_blank=(not required),
-                        value=default,
-                    )
+                    values = zip(map(str, field["enum"]), field["enum"])
+                    _widget = Select(values, id=_id, allow_blank=(not required), value=default_args["value"])
                 case ["string", "null"]:
                     required = False
-                    _widget = Input(id=_id, validators=[], value=default, placeholder=placeholder)
+                    _widget = Input(id=_id, validators=[], **default_args)
                 case ["string"]:
-                    _widget = Input(
-                        id=_id, validators=[Length(int(required))], password=is_password, value=default, placeholder=placeholder
-                    )
+                    _widget = Input(id=_id, **default_args)
                 case ["integer"]:
-                    _widget = Input(
-                        id=_id, validators=[Integer(), Length(int(required))], value=default, placeholder=placeholder
-                    )
+                    _widget = Input(validators=default_args["validators"] + [(Integer())], **default_args)
                 case ["number"]:
-                    _widget = Input(
-                        id=_id, validators=[Number(), Length(int(required))], value=default, placeholder=placeholder
-                    )
+                    _widget = Input(validators=default_args["validators"] + [(Number())], **default_args)
                 case [unmatched]:
                     raise Exception(f"Unmatched: {unmatched}")
 
