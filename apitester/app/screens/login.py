@@ -47,3 +47,5 @@ class LoginScreen(ModalFormScreen[LoginModel]):
             async with session.post(self.auth.url, data={**post_data}) as response:
                 json = await response.json()
                 auth["token"] = extract(json, self.auth.token_path)
+
+        self.notify("Logged in ok", title="Auth")

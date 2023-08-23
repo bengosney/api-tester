@@ -46,6 +46,9 @@ class APITester(App):
     def action_reload_config(self) -> None:
         if config.check_reload():
             self._reload()
+            self.notify("Reloaded OK", title="Reload Config")
+        else:
+            self.notify("No changes", title="Reload Config")
 
     def _reload(self) -> None:
         if tree := self.query_one(URLTree):

@@ -23,3 +23,5 @@ class APIKeyScreen(ModalFormScreen[APIKey]):
             auth.remove()
 
         auth["api_key"] = model.api_key
+
+        self.notify("API Key Set", title="Auth")

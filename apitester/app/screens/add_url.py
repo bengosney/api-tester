@@ -20,3 +20,4 @@ class AddURLScreen(ModalFormScreen[NewURL]):
 
     def on_submit(self, model: NewURL) -> None:
         config.add_url(**dict(model))
+        self.notify("New URL save as a comment in your config file", title="New URL")
