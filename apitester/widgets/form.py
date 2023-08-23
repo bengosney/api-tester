@@ -1,6 +1,6 @@
 # Standard Library
 from contextlib import suppress
-from typing import Generic, Literal, TypeVar
+from typing import Any, Generic, Literal, TypeVar
 
 # Third Party
 from pydantic import BaseModel, ValidationError
@@ -18,16 +18,27 @@ T = TypeVar("T", bound=BaseModel)
 class Form(Widget, Generic[T]):
     model: type[T]
     show_submit: bool
+    inital: dict[str, Any]
+    password_fields: list[str] = ["password"]
 
     class Submit(Message):
         def __init__(self, model: T) -> None:
             self.model = model
             super().__init__()
 
-    def __init__(self, model: type[T], show_submit: bool = True, classes: str | None = None, *args, **kwargs) -> None:
+    def __init__(
+        self,
+        model: type[T],
+        show_submit: bool = True,
+        classes: str | None = None,
+        inital: dict[str, Any] | None = None,
+        *args,
+        **kwargs,
+    ) -> None:
         self.model = model
         self._schema = model.model_json_schema()
         self.show_submit = show_submit
+        self.inital = inital if inital is not None else {}
         super().__init__(classes=classes or "form", *args, **kwargs)
 
     def on_mount(self) -> None:
@@ -54,8 +65,9 @@ class Form(Widget, Generic[T]):
             required = None not in field_types
             field_types = list(filter(lambda i: i is not None, field_types))
 
-            default = str(field.get("default", ""))
+            default = self.inital.get(id, None) or str(field.get("default", ""))
             placeholder = "" if default == "" else f"Default: {default}"
+            is_password = id in self.password_fields
 
             _widget = None
             match field_types:
@@ -72,7 +84,9 @@ class Form(Widget, Generic[T]):
                     required = False
                     _widget = Input(id=_id, validators=[], value=default, placeholder=placeholder)
                 case ["string"]:
-                    _widget = Input(id=_id, validators=[Length(int(required))], value=default, placeholder=placeholder)
+                    _widget = Input(
+                        id=_id, validators=[Length(int(required))], password=is_password, value=default, placeholder=placeholder
+                    )
                 case ["integer"]:
                     _widget = Input(
                         id=_id, validators=[Integer(), Length(int(required))], value=default, placeholder=placeholder
