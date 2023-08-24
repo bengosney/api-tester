@@ -5,7 +5,7 @@ from typing import Any, Literal, TypeVar
 # Third Party
 from pydantic import BaseModel
 from textual.app import ComposeResult
-from textual.containers import Grid
+from textual.containers import Grid, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Button
 
@@ -43,7 +43,7 @@ class ModalFormScreen(ModalScreen[ScreenResultType | Literal[False]]):
     def compose(self) -> ComposeResult:
         self.form = Form[ScreenResultType](self.model, show_submit=False, id="url_form", inital=self.inital)
 
-        with Grid(id="dialog"):
+        with VerticalScroll(id="dialog"):
             yield self.form
             with Grid(id="dialog-buttons"):
                 yield Button("Add", variant="primary", id="submit")
