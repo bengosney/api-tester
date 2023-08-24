@@ -1,5 +1,5 @@
 # Third Party
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 # First Party
 from apitester.auth import auth
@@ -9,6 +9,8 @@ from .modal_form import ModalFormScreen
 
 
 class APIKey(BaseModel):
+    model_config = ConfigDict(title="API Key")
+
     api_key: str
     remember: bool = True
 

@@ -1,5 +1,5 @@
 # Third Party
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 # First Party
 from apitester.config import config
@@ -10,6 +10,8 @@ from .modal_form import ModalFormScreen
 
 
 class NewURL(BaseModel):
+    model_config = ConfigDict(title="Add URL")
+
     name: str
     url: str
     method: URLMethod = "GET"

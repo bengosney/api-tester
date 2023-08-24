@@ -5,7 +5,7 @@ from typing import Any
 
 # Third Party
 import aiohttp
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 # First Party
 from apitester.auth import auth
@@ -17,6 +17,8 @@ from .modal_form import ModalFormScreen
 
 
 class LoginModel(BaseModel):
+    model_config = ConfigDict(title="Login")
+
     username: str
     password: str
     remember: bool = True
