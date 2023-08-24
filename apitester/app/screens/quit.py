@@ -11,6 +11,7 @@ class QuitScreen(ModalScreen[bool]):
     """Screen with a dialog to quit."""
 
     BINDINGS = [("escape", "app.pop_screen", "Cancel")]
+    AUTO_FOCUS = "#quit"
 
     def compose(self) -> ComposeResult:
         with VerticalScroll(id="dialog"):

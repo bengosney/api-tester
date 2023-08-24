@@ -26,6 +26,7 @@ class LoginModel(BaseModel):
 
 class LoginScreen(ModalFormScreen[LoginModel]):
     model = LoginModel
+    AUTO_FOCUS = "#submit" if auth.password != "" else "Input"
 
     def __init__(self, auth: BearerAuthConf, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

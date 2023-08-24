@@ -21,6 +21,7 @@ class ModalFormException(Exception):
 
 class ModalFormScreen(ModalScreen[ScreenResultType | Literal[False]]):
     BINDINGS = [("escape", "dismiss", "Cancel")]
+    AUTO_FOCUS = "Input"
 
     model: type[ScreenResultType]
     error_message: str | None = None
