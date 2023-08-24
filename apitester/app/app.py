@@ -20,7 +20,8 @@ class APITester(App):
         ("q", "try_quit", "Quit"),
         ("d", "toggle_dark", "Toggle dark mode"),
         ("r", "reload_config", "Reload Config"),
-        ("a", "add_url", "Add a url"),
+        ("n", "add_url", "Add a new url"),
+        ("a", "auth", "Authenticate"),
     ]
 
     def compose(self) -> ComposeResult:
@@ -32,7 +33,7 @@ class APITester(App):
             with Horizontal(id="main-pane"):
                 with Container(id="left-pane"):
                     if config.auth.type != "none":
-                        yield Button("Auth", id="auth")
+                        yield Button("Authenticate", id="auth")
                     yield Label("URL List")
                     with VerticalScroll():
                         yield tree
@@ -57,13 +58,20 @@ class APITester(App):
     def action_toggle_dark(self) -> None:
         self.dark = not self.dark
 
+    def auth(self):
+        match config.auth.type:
+            case "bearer":
+                self.push_screen(LoginScreen(config.auth))
+            case "header":
+                self.push_screen(APIKeyScreen())
+
+    def action_auth(self):
+        self.auth()
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
             case "auth":
-                if config.auth.type == "bearer":
-                    self.push_screen(LoginScreen(config.auth))
-                if config.auth.type == "header":
-                    self.push_screen(APIKeyScreen())
+                self.auth()
 
     def on_tree_node_selected(self, event: Tree.NodeSelected) -> None:
         if event.node.data:
