@@ -65,10 +65,13 @@ class Form(Widget, Generic[T]):
             required = None not in field_types
             field_types = list(filter(lambda i: i is not None, field_types))
 
+            is_password = id in self.password_fields
             default_args = {}
             default_args["value"] = self.inital.get(id, None) or str(field.get("default", ""))
-            default_args["placeholder"] = "" if default_args["value"] == "" else f"Default: {default_args['value']}"
-            default_args["password"] = id in self.password_fields
+            default_args["placeholder"] = (
+                "" if default_args["value"] == "" or is_password else f"Default: {default_args['value']}"
+            )
+            default_args["password"] = is_password
             default_args["validators"] = [Length(int(required))]
 
             _widget = None

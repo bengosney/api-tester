@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from textual.app import ComposeResult
 from textual.containers import Grid, VerticalScroll
 from textual.screen import ModalScreen
-from textual.widgets import Button
+from textual.widgets import Button, Input
 
 # First Party
 from apitester.widgets import Form
@@ -21,7 +21,6 @@ class ModalFormException(Exception):
 
 class ModalFormScreen(ModalScreen[ScreenResultType | Literal[False]]):
     BINDINGS = [("escape", "dismiss", "Cancel")]
-    AUTO_FOCUS = "Input"
 
     model: type[ScreenResultType]
     error_message: str | None = None
@@ -36,6 +35,14 @@ class ModalFormScreen(ModalScreen[ScreenResultType | Literal[False]]):
         self._inital = inital or {}
 
         super().__init__(*args, **kwargs)
+
+    def on_mount(self):
+        for input in self.query("Input"):
+            if type(input) is Input and input.value == "":
+                input.focus()
+                break
+        else:
+            self.query_one("#submit").focus()
 
     @property
     def inital(self) -> dict[str, Any]:

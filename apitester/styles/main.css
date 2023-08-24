@@ -120,3 +120,7 @@ Select.-invalid > SelectCurrent {
     width: 100%;
     content-align: center middle;
 }
+
+#tree-wrapper {
+    border-top: double $accent;
+}

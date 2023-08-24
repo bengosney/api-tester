@@ -1,9 +1,8 @@
 # Standard Library
-
 # Third Party
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, Vertical, VerticalScroll
-from textual.widgets import Button, Footer, Header, Label, Tree
+from textual.widgets import Button, Footer, Header, Tree
 
 # First Party
 from apitester.app.screens import AddURLScreen, APIKeyScreen, LoginScreen, QuitScreen
@@ -21,11 +20,10 @@ class APITester(App):
         ("d", "toggle_dark", "Toggle dark mode"),
         ("r", "reload_config", "Reload Config"),
         ("n", "add_url", "Add a new url"),
-        ("a", "auth", "Authenticate"),
     ]
 
     def compose(self) -> ComposeResult:
-        tree: URLTree = URLTree(config.urls)
+        tree: URLTree = URLTree(config.urls, id="urltree")
 
         yield Header()
 
@@ -34,8 +32,7 @@ class APITester(App):
                 with Container(id="left-pane"):
                     if config.auth.type != "none":
                         yield Button("Authenticate", id="auth")
-                    yield Label("URL List")
-                    with VerticalScroll():
+                    with VerticalScroll(id="tree-wrapper"):
                         yield tree
                 with Container():
                     with VerticalScroll():
@@ -59,11 +56,15 @@ class APITester(App):
         self.dark = not self.dark
 
     def auth(self):
+        def focus_tree(result):
+            if result:
+                self.query_one("#urltree").focus()
+
         match config.auth.type:
             case "bearer":
-                self.push_screen(LoginScreen(config.auth))
+                self.push_screen(LoginScreen(config.auth), callback=focus_tree)
             case "header":
-                self.push_screen(APIKeyScreen())
+                self.push_screen(APIKeyScreen(), callback=focus_tree)
 
     def action_auth(self):
         self.auth()

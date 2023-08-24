@@ -26,6 +26,14 @@ class Endpoint(Static):
         self.url = url
         self.store = DataStore(f"{url.url}-{url.method}")
 
+    def on_mount(self):
+        for input in self.query("Input"):
+            if type(input) is Input and input.value == "":
+                input.focus()
+                break
+        else:
+            self.query_one("#get-url").focus()
+
     def compose(self) -> ComposeResult:
         self.styles.padding = 1
         yield AdvancedLabel(f"{self.url}", prefix="URL: ", id="url-label")

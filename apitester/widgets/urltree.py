@@ -15,6 +15,12 @@ class URLTree(Static):
         self.urls = urls
         super().__init__(*args, **kwargs)
 
+    def focus(self, scroll_visible: bool = True) -> Tree[dict]:
+        if type(tree := self.query_one("Tree")) == Tree:
+            return tree.focus(scroll_visible)
+
+        raise Exception("Tree not mounted")
+
     def compose(self) -> ComposeResult:
         tree: Tree[dict] = Tree("URLs")
 
