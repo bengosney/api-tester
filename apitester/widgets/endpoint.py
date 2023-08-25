@@ -78,7 +78,7 @@ class Endpoint(Static):
 
     @work()
     async def get_url(self):
-        plugins = PluginManager(self.log)
+        plugins = getattr(self.app, "plugin_manager", PluginManager(self.log))
 
         headers = plugins.get_headers({"accept": "application/json"})
         cookies = plugins.get_cookies()

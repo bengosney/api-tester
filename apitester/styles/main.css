@@ -48,6 +48,17 @@ Screen {
     min-height: 10;
 }
 
+#dialog #list {
+    height: auto;
+    padding-bottom: 1;
+}
+
+#dialog .title {
+    text-align: center;
+    width: 100%;
+    text-style: bold;
+}
+
 
 #dialog-buttons {
     grid-size: 2;

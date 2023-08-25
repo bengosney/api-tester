@@ -1,5 +1,3 @@
-# Standard Library
-
 # Third Party
 from textual.app import ComposeResult
 from textual.containers import Grid, Vertical, VerticalScroll

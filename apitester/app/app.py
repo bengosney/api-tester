@@ -5,8 +5,9 @@ from textual.containers import Container, Horizontal, Vertical, VerticalScroll
 from textual.widgets import Button, Footer, Header, Tree
 
 # First Party
-from apitester.app.screens import AddURLScreen, APIKeyScreen, LoginScreen, QuitScreen
+from apitester.app.screens import AddURLScreen, APIKeyScreen, LoginScreen, PluginScreen, QuitScreen
 from apitester.config import config
+from apitester.plugin_manager import PluginManager
 from apitester.widgets import Endpoint, URLTree
 
 
@@ -20,7 +21,10 @@ class APITester(App):
         ("d", "toggle_dark", "Toggle dark mode"),
         ("r", "reload_config", "Reload Config"),
         ("n", "add_url", "Add a new url"),
+        ("p", "plugin_list", "Show plugin list"),
     ]
+
+    plugin_manager: PluginManager
 
     def compose(self) -> ComposeResult:
         tree: URLTree = URLTree(config.urls, id="urltree")
@@ -40,6 +44,9 @@ class APITester(App):
                             pass
 
         yield Footer()
+
+    def on_mount(self):
+        self.plugin_manager = PluginManager(self.log)
 
     def action_reload_config(self) -> None:
         if config.check_reload():
@@ -82,6 +89,9 @@ class APITester(App):
 
     def action_add_url(self):
         self.push_screen(AddURLScreen(), lambda ok: self._reload() if ok else None)
+
+    def action_plugin_list(self):
+        self.push_screen(PluginScreen())
 
     def action_try_quit(self) -> None:
         """Action to display the quit dialog."""
