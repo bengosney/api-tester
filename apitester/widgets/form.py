@@ -106,14 +106,14 @@ class Form(Widget, Generic[T]):
     def submit(self) -> T | Literal[False]:
         schema = self._schema
         data = {}
-        for id, _ in schema["properties"].items():
+        for id, field in schema["properties"].items():
             if input := self.query_one(f"#{id}_input"):
                 input.set_class(False, "-invalid")
 
             if val := getattr(input or None, "value", None):
                 data[id] = val
             else:
-                data[id] = None
+                data[id] = False if field["type"] == "boolean" else None
 
             if type(label := self.query_one(f"#{id}_input_error")) == Label:
                 label.update("")
