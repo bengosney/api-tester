@@ -6,6 +6,7 @@ from typing import Any
 # Third Party
 import aiohttp
 from pydantic import BaseModel, ConfigDict
+from textual.widgets import Input
 
 # First Party
 from apitester.auth import auth
@@ -26,11 +27,18 @@ class LoginModel(BaseModel):
 
 class LoginScreen(ModalFormScreen[LoginModel]):
     model = LoginModel
-    AUTO_FOCUS = "#submit" if auth.password != "" else "Input"
 
     def __init__(self, auth: BearerAuthConf, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.auth = auth
+
+    def on_mount(self):
+        for input in self.query("Input"):
+            if type(input) is Input and input.value == "":
+                input.focus()
+                break
+        else:
+            self.query_one("#submit").focus()
 
     @property
     def inital(self) -> dict[str, Any]:
