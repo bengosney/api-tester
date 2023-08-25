@@ -613,6 +613,10 @@ multidict==6.0.4 \
     # via
     #   aiohttp
     #   yarl
+pluggy==1.2.0 \
+    --hash=sha256:c2fd55a7d7a3863cba1a013e4e2414658b1d07b6bc57b3919e0c63c9abb99849 \
+    --hash=sha256:d12f0c4b579b15f5e054301bb226ee85eeeba08ffec228092f8defbaa3a4c4b3
+    # via api-test (pyproject.toml)
 pycares==4.3.0 \
     --hash=sha256:008531733f9c7a976b59c7760a3672b191159fd69ae76c01ca051f20b5e44164 \
     --hash=sha256:1730ef93e33e4682fbbf0e7fb19df2ed9822779d17de8ea6e20d5b0d71c1d2be \

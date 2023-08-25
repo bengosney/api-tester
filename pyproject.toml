@@ -3,7 +3,7 @@ name = "api-test"
 description = "Small, Simple api tester"
 version = "0.0.1"
 authors = [{ name = "Ben Gosney", email = "bengosney@googlemail.com" }]
-dependencies = ["textual", "pydantic", "pydantic-settings", "keyring", "Jinja2", "tinydb", "aiohttp[speedups]"]
+dependencies = ["textual", "pydantic", "pydantic-settings", "keyring", "Jinja2", "tinydb", "aiohttp[speedups]", "pluggy"]
 
 [project.optional-dependencies]
 dev = ["black", "mypy", "pip-tools", "pre-commit", "textual-dev", "devtools"]

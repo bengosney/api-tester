@@ -13,6 +13,7 @@ from textual.worker import Worker, WorkerState
 from apitester.auth import auth
 from apitester.config import config
 from apitester.data import DataStore
+from apitester.plugin_manager import PluginManager
 from apitester.url import URL
 from apitester.widgets.labels import AdvancedLabel
 from apitester.widgets.loader import Loader
@@ -20,6 +21,12 @@ from apitester.widgets.loader import Loader
 
 class Endpoint(Static):
     loadingCount: int = 0
+
+    DEFAULT_CSS = """
+    Endpoint {
+        padding: 1;
+    }
+    """
 
     def __init__(self, url: URL, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -35,7 +42,6 @@ class Endpoint(Static):
             self.query_one("#get-url").focus()
 
     def compose(self) -> ComposeResult:
-        self.styles.padding = 1
         yield AdvancedLabel(f"{self.url}", prefix="URL: ", id="url-label")
         yield Label(f"Method: {self.url.method}", id="method-label")
         yield Static(id="loader")
@@ -72,7 +78,10 @@ class Endpoint(Static):
 
     @work()
     async def get_url(self):
-        headers = {"accept": "application/json"}
+        plugins = PluginManager(self.log)
+
+        headers = plugins.get_headers({"accept": "application/json"})
+        cookies = plugins.get_cookies()
 
         with suppress(KeyError):
             match config.auth.type:
@@ -82,12 +91,12 @@ class Endpoint(Static):
                     headers[getattr(config.auth, "key")] = auth["api_key"]
 
         if type(output := self.query_one("#get-response")) == Pretty:
-            async with aiohttp.ClientSession(headers=headers) as session:
+            async with aiohttp.ClientSession(headers=headers, cookies=cookies) as session:
                 try:
                     method = self.url.method.lower()
-                    data = {f: self.url[f] for f in self.url.fields}
+                    request_data = {f: self.url[f] for f in self.url.fields}
 
-                    async with getattr(session, method)(str(self.url), data=data) as response:
+                    async with getattr(session, method)(str(self.url), data=request_data) as response:
                         if "json" in response.content_type:
                             data = await response.json()
                         else:
