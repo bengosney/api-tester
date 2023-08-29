@@ -33,7 +33,7 @@ requirements.txt: pyproject.toml $(PIP_SYNC_PATH)
 	@echo "Builing $@"
 	python -m piptools compile --generate-hashes -q $<
 
-.direnv: .envrc
+.direnv: .envrc requirements.txt
 	@python -m ensurepip
 	@python -m pip install --upgrade pip
 	@touch $@ $^
@@ -78,8 +78,8 @@ upgrade: $(PIP_PATH) $(WHEEL_PATH) $(PIP_SYNC_PATH)
 	@python -m piptools compile -q --upgrade pyproject.toml
 	@python -m pre_commit autoupdate
 
-dev:
+dev: .direnv
 	textual run --dev apitester.app:run
 
-console:
+console: .direnv
 	textual console -x EVENT
