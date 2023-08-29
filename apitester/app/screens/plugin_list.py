@@ -20,8 +20,8 @@ class PluginScreen(ModalScreen[None]):
         with VerticalScroll(id="dialog"):
             yield Label("Active Plugins", classes="title")
             with VerticalScroll(id="list"):
-                for plugin in plugins.active_plugins:
-                    yield Label(f"{plugin}")
+                for name, description in plugins.active_plugins:
+                    yield Label(f"{name} - {description or 'no description'}")
             yield Button("Close", id="close")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:

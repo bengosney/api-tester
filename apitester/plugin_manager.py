@@ -33,8 +33,9 @@ class PluginManager:
         return pm
 
     @property
-    def active_plugins(self) -> Iterable[str]:
-        yield from [name for name, _ in self._plugin_manager.list_name_plugin()]
+    def active_plugins(self) -> Iterable[tuple[str, str | None]]:
+        for name, plugin in self._plugin_manager.list_name_plugin():
+            yield (name, str(plugin.__doc__) or None)
 
     def get_cookies(self, inital: dict[str, str] | None = None):
         cookies = self._plugin_manager.hook.cookies()
