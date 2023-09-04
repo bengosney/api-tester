@@ -1,3 +1,6 @@
+# Standard Library
+from typing import Any
+
 # Third Party
 from pydantic import BaseModel, ConfigDict
 
@@ -17,6 +20,10 @@ class APIKey(BaseModel):
 
 class APIKeyScreen(ModalFormScreen[APIKey]):
     model = APIKey
+
+    @property
+    def inital(self) -> dict[str, Any]:
+        return {"api_key": auth.get("api_key")}
 
     def on_submit(self, model: APIKey) -> None:
         if model.remember:
