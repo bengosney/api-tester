@@ -8,6 +8,7 @@ from pydantic import BaseModel, BeforeValidator, ValidationError, WrapValidator
 from pydantic_settings import BaseSettings
 
 # First Party
+from apitester.plugin_manager import PluginManager
 from apitester.types import URLMethod
 from apitester.url import URL
 from apitester.utils import deferedURLRender
@@ -32,6 +33,9 @@ class HeaderAuthConf(BaseModel):
 class NoAuthConf(BaseModel):
     type: Literal["none"] = "none"
 
+
+pm = PluginManager()
+aut = pm.get_auth_methods()
 
 AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthConf
 

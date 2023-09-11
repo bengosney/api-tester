@@ -1,5 +1,9 @@
 [auth]
 url = "{{ urls.auth }}"
+type = "bob"
+
+[authy]
+url = "{{ urls.auth }}"
 type = "bearer"
 headers = ["username", "$password"]
 token_path = "data.token"

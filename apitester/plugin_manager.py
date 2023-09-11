@@ -5,6 +5,7 @@ from typing import Any
 
 # Third Party
 import pluggy
+from pydantic import BaseModel
 
 # First Party
 from apitester import __name__ as project_name
@@ -44,3 +45,7 @@ class PluginManager:
     def get_headers(self, inital: dict[str, str] | None = None):
         headers = self._plugin_manager.hook.headers()
         return ChainMap((inital or {}), *headers)
+
+    def get_auth_methods(self) -> list[type[BaseModel]]:
+        auth = self._plugin_manager.hook.auth()
+        return auth

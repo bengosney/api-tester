@@ -17,5 +17,5 @@ class RequestSpec:
         """Add cookies to a request."""
 
     @hookspec
-    def auth(self, method: str) -> bool:
+    def auth(self) -> list:
         """Provide auth screen."""
