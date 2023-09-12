@@ -1,7 +1,7 @@
 # Standard Library
 from collections import ChainMap
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, Self
 
 # Third Party
 import pluggy
@@ -16,22 +16,31 @@ from . import plugins
 
 
 class PluginManager:
-    log: Any
+    _instance: Self | None = None
+    log: Any = print
+    _pm: pluggy.PluginManager | None = None
 
-    def __init__(self, log=None) -> None:
-        self.log = log or print
-        self._plugin_manager = self._get_plugin_manager()
+    def __new__(cls, log=None) -> Self:
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
 
-    def _get_plugin_manager(self):
-        pm = pluggy.PluginManager(project_name)
-        pm.add_hookspecs(RequestSpec)
-        for plugin in plugins.__all__:
-            __import__(f"apitester.plugins.{plugin}")
-            _class = getattr(plugins, plugin)
-            pm.register(_class(), plugin)
-        pm.load_setuptools_entrypoints(project_name)
+        if log is not None:
+            cls._instance.log = log
 
-        return pm
+        return cls._instance
+
+    @property
+    def _plugin_manager(self):
+        if self._pm is None:
+            self._pm = pluggy.PluginManager(project_name)
+            self._pm.add_hookspecs(RequestSpec)
+            for plugin in plugins.__all__:
+                __import__(f"apitester.plugins.{plugin}")
+                _class = getattr(plugins, plugin)
+                self._pm.register(_class(), plugin)
+            self._pm.load_setuptools_entrypoints(project_name)
+
+        return self._pm
 
     @property
     def active_plugins(self) -> Iterable[tuple[str, str | None]]:
