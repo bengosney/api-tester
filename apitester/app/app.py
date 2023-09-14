@@ -2,6 +2,7 @@
 # Third Party
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, Vertical, VerticalScroll
+from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Tree
 
 # First Party
@@ -67,11 +68,20 @@ class APITester(App):
             if result:
                 self.query_one("#urltree").focus()
 
-        match config.auth.type:
-            case "bearer":
-                self.push_screen(LoginScreen(config.auth), callback=focus_tree)
-            case "header":
-                self.push_screen(APIKeyScreen(), callback=focus_tree)
+        screen = None
+        try:
+            screen = config.auth.get_modal()(auth=config.auth)
+        except Exception as e:
+            self.log("Exception:")
+            self.log(e)
+            match config.auth.type:
+                case "bearer":
+                    screen = LoginScreen(config.auth)
+                case "header":
+                    screen = APIKeyScreen()
+
+        if isinstance(screen, Screen):
+            self.push_screen(screen, callback=focus_tree)
 
     def action_auth(self):
         self.auth()

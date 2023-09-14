@@ -55,6 +55,8 @@ class PluginManager:
         headers = self._plugin_manager.hook.headers()
         return ChainMap((inital or {}), *headers)
 
-    def get_auth_methods(self) -> list[type[BaseModel]]:
-        auth = self._plugin_manager.hook.auth()
-        return auth
+    def get_auth_configs(self) -> list[type[BaseModel]]:
+        return self._plugin_manager.hook.auth_config()
+
+    def get_auth_modal(self):
+        pass

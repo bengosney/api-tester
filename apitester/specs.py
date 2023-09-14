@@ -1,5 +1,10 @@
+# Standard Library
+from typing import Literal
+
 # Third Party
 import pluggy
+from pydantic import BaseModel
+from textual.screen import ModalScreen
 
 # First Party
 from apitester import __name__ as project_name
@@ -17,5 +22,9 @@ class RequestSpec:
         """Add cookies to a request."""
 
     @hookspec
-    def auth(self) -> list:
-        """Provide auth screen."""
+    def auth_config(self) -> BaseModel:
+        """Provide auth config model."""
+
+    @hookspec(firstresult=True)
+    def auth_modal(self) -> ModalScreen | Literal[False]:
+        """Provide any auth modal, if needed."""

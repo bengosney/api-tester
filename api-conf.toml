@@ -1,6 +1,8 @@
 [auth]
 url = "{{ urls.auth }}"
-type = "bob"
+type = "login"
+headers = ["username", "$password"]
+token_path = "data.token"
 
 [authy]
 url = "{{ urls.auth }}"

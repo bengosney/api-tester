@@ -1,7 +1,7 @@
 # Standard Library
 import os
 import tomllib
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Union
 
 # Third Party
 from pydantic import BaseModel, BeforeValidator, ValidationError, WrapValidator
@@ -35,9 +35,7 @@ class NoAuthConf(BaseModel):
 
 
 pm = PluginManager()
-aut = pm.get_auth_methods()
-
-AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthConf
+AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthConf | Union[tuple(pm.get_auth_configs())]  # type: ignore
 
 
 def validate_urldict(v, handler):

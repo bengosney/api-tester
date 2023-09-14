@@ -27,10 +27,15 @@ class LoginModel(BaseModel):
 
 class LoginScreen(ModalFormScreen[LoginModel]):
     model = LoginModel
+    _plugin = None
 
     def __init__(self, auth: BearerAuthConf, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.auth = auth
+
+    @classmethod
+    def set_plugin(cls, plugin):
+        cls._plugin = plugin
 
     def on_mount(self):
         for input in self.query("Input"):
