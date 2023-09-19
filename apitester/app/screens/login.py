@@ -1,6 +1,7 @@
 # Standard Library
 
 # Standard Library
+from collections.abc import Callable
 from typing import Any
 
 # Third Party
@@ -27,15 +28,15 @@ class LoginModel(BaseModel):
 
 class LoginScreen(ModalFormScreen[LoginModel]):
     model = LoginModel
-    _plugin = None
+    _callback = None | Callable[[str], None]
 
     def __init__(self, auth: BearerAuthConf, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.auth = auth
 
     @classmethod
-    def set_plugin(cls, plugin):
-        cls._plugin = plugin
+    def on_got_token(cls, callback: Callable[[str], None]):
+        cls._callback = callback
 
     def on_mount(self):
         for input in self.query("Input"):
@@ -62,6 +63,9 @@ class LoginScreen(ModalFormScreen[LoginModel]):
             }
             async with session.post(self.auth.url, data={**post_data}) as response:
                 json = await response.json()
+                token = extract(json, self.auth.token_path)
                 auth["token"] = extract(json, self.auth.token_path)
+                if self._callback is not None:
+                    self._callback(token)
 
         self.notify("Logged in ok", title="Auth")
