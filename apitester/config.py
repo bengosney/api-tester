@@ -28,12 +28,15 @@ class HeaderAuthConf(BaseModel):
     type: Literal["header"]
     key: str
 
+class BasicAuthConf(BaseModel):
+    type: Literal["basic"]
+
 
 class NoAuthConf(BaseModel):
     type: Literal["none"] = "none"
 
 
-AuthConf = BearerAuthConf | HeaderAuthConf | NoAuthConf
+AuthConf = BearerAuthConf | HeaderAuthConf | BasicAuthConf | NoAuthConf
 
 
 def validate_urldict(v, handler):

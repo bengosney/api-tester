@@ -5,7 +5,7 @@ from textual.containers import Container, Horizontal, Vertical, VerticalScroll
 from textual.widgets import Button, Footer, Header, Tree
 
 # First Party
-from apitester.app.screens import AddURLScreen, APIKeyScreen, LoginScreen, PluginScreen, QuitScreen
+from apitester.app.screens import AddURLScreen, APIKeyScreen, LoginScreen, PluginScreen, QuitScreen, BasicAuthScreen
 from apitester.config import config
 from apitester.plugin_manager import PluginManager
 from apitester.widgets import Endpoint, URLTree
@@ -72,6 +72,10 @@ class APITester(App):
                 self.push_screen(LoginScreen(config.auth), callback=focus_tree)
             case "header":
                 self.push_screen(APIKeyScreen(), callback=focus_tree)
+            case "basic":
+                self.push_screen(BasicAuthScreen(), callback=focus_tree)
+            case _:
+                self.notify("No Auth Required", title="Auth")
 
     def action_auth(self):
         self.auth()

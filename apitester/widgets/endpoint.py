@@ -3,6 +3,7 @@ from contextlib import suppress
 
 # Third Party
 import aiohttp
+from aiohttp import BasicAuth
 from textual import on, work
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
@@ -83,15 +84,19 @@ class Endpoint(Static):
         headers = plugins.get_headers({"accept": "application/json"})
         cookies = plugins.get_cookies()
 
+        basic_auth = None
+
         with suppress(KeyError):
             match config.auth.type:
                 case "bearer":
                     headers["Authorization"] = f"Bearer {auth['token']}"
                 case "header":
                     headers[getattr(config.auth, "key")] = auth["api_key"]
+                case "basic":
+                    basic_auth = BasicAuth((auth.username or "").strip(), (auth.password or "").strip())
 
         if type(output := self.query_one("#get-response")) == Pretty:
-            async with aiohttp.ClientSession(headers=headers, cookies=cookies) as session:
+            async with aiohttp.ClientSession(headers=headers, cookies=cookies, auth=basic_auth) as session:
                 try:
                     method = self.url.method.lower()
                     request_data = {f: self.url[f] for f in self.url.fields}
