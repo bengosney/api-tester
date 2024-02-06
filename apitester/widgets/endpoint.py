@@ -74,8 +74,8 @@ class Endpoint(Static):
                     self.url[field] = input.value
                     self.store[id] = input.value
 
-            if type(label := self.query_one("#url-label")) == Label:
-                label.update(str(self.url))
+            if Label in type.mro(type(label := self.query_one("#url-label"))):
+                label.update(str(self.url))  # type: ignore
 
     @work()
     async def get_url(self):
