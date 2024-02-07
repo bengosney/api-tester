@@ -19,9 +19,7 @@ class DataStore:
         return self.__class__._db
 
     def _prefix_key(self, name):
-        if self.prexif is not None:
-            return f"{self.prexif}-{name}"
-        return name
+        return f"{self.prexif}-{name}" if self.prexif is not None else name
 
     def __setitem__(self, name: str, value: Any) -> None:
         kv = Query()

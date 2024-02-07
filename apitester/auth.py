@@ -17,16 +17,12 @@ class Auth:
     @property
     @suppress(KeyringLocked)
     def username(self) -> str | None:
-        if credentials := self._credentials():
-            return credentials.username
-        return None
+        return credentials.username if (credentials := self._credentials()) else None
 
     @property
     @suppress(KeyringLocked)
     def password(self) -> str | None:
-        if credentials := self._credentials():
-            return credentials.password
-        return None
+        return credentials.password if (credentials := self._credentials()) else None
 
     @suppress(KeyringLocked)
     def store(self, username: str, password: str) -> None:

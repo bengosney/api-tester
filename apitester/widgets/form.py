@@ -66,8 +66,9 @@ class Form(Widget, Generic[T]):
             field_types = list(filter(lambda i: i is not None, field_types))
 
             is_password = id in self.password_fields
-            default_args = {}
-            default_args["value"] = self.inital.get(id, None) or str(field.get("default", ""))
+            default_args = {
+                "value": self.inital.get(id, None) or str(field.get("default", ""))
+            }
             default_args["placeholder"] = (
                 "" if default_args["value"] == "" or is_password else f"Default: {default_args['value']}"
             )
